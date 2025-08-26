@@ -553,6 +553,11 @@ class GameScene extends Phaser.Scene {
         this.events.off('heartCollected');
         this.events.off('shopPurchase');
         
+        // 清理地图加载器
+        if (this.mapLoader) {
+            this.mapLoader.destroy();
+        }
+        
         // 清理系统
         if (this.combatSystem) {
             this.combatSystem.destroy();

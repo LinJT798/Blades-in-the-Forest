@@ -114,7 +114,11 @@ class MapLoader {
         const decorationConfig = this.getDecorationConfig(decorationId);
         
         if (decorationConfig) {
-            const sprite = this.scene.add.sprite(x, y, decorationConfig.texture);
+            // 装饰物放在瓦片底部中心
+            // x是瓦片左边界，y是瓦片上边界
+            const spriteX = x + GameConfig.TILE_SIZE / 2;
+            const spriteY = y + GameConfig.TILE_SIZE; // 瓦片底部
+            const sprite = this.scene.add.sprite(spriteX, spriteY, decorationConfig.texture);
             
             // 设置尺寸（根据需求文档）
             const targetSize = GameConfig.DECORATION_SIZES[decorationId];
@@ -124,14 +128,13 @@ class MapLoader {
                 sprite.setScale(scaleX, scaleY);
             }
             
-            // 设置原点
-            sprite.setOrigin(0, 1);
+            // 设置原点为底部中心
+            sprite.setOrigin(0.5, 1);
             
             // 如果是需要碰撞的装饰物（rock_1, rock_2, rock_3）
             if (GameConfig.COLLISION_DECORATIONS.includes(decorationId)) {
                 this.scene.physics.add.existing(sprite, true);
                 sprite.body.setSize(targetSize.width * 0.8, targetSize.height * 0.8);
-                sprite.body.setOffset(targetSize.width * 0.1, targetSize.height * 0.1);
             }
             
             // 设置深度
@@ -290,5 +293,35 @@ class MapLoader {
             
             layer.tilePositionX = camera.scrollX * (1 - parallaxFactor);
         });
+    }
+    
+    destroy() {
+        // 清理所有装饰物精灵
+        this.decorations.forEach(decoration => {
+            if (decoration && decoration.destroy) {
+                decoration.destroy();
+            }
+        });
+        this.decorations = [];
+        
+        // 清理视差层
+        this.parallaxLayers.forEach(layer => {
+            if (layer && layer.destroy) {
+                layer.destroy();
+            }
+        });
+        this.parallaxLayers = [];
+        
+        // 清理地图
+        if (this.map) {
+            this.map.destroy();
+            this.map = null;
+        }
+        
+        // 清理瓦片层
+        if (this.tileLayer) {
+            this.tileLayer.destroy();
+            this.tileLayer = null;
+        }
     }
 }
