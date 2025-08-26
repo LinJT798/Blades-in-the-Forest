@@ -1,0 +1,62 @@
+{
+  "export_mode": "atlas",
+  "export_type": "\u56fe\u96c6\u5bfc\u51fa",
+  "atlas_name": "box_1",
+  "atlas_file": "box_1.png",
+  "image_format": "PNG",
+  "atlas_size": {
+    "width": 70,
+    "height": 20
+  },
+  "sprite_count": 4,
+  "sprite_padding": 2,
+  "layout_info": {
+    "estimated_columns": 3,
+    "estimated_rows": 0,
+    "total_frames": 4,
+    "average_sprite_width": 16,
+    "average_sprite_height": 20,
+    "min_sprite_width": 16,
+    "max_sprite_width": 16,
+    "min_sprite_height": 20,
+    "max_sprite_height": 20
+  },
+  "sprites": [
+    {
+      "name": "sprite_799",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "width": 16,
+        "height": 20
+      }
+    },
+    {
+      "name": "sprite_800",
+      "frame": {
+        "x": 18,
+        "y": 0,
+        "width": 16,
+        "height": 20
+      }
+    },
+    {
+      "name": "sprite_801",
+      "frame": {
+        "x": 36,
+        "y": 0,
+        "width": 16,
+        "height": 20
+      }
+    },
+    {
+      "name": "sprite_802",
+      "frame": {
+        "x": 54,
+        "y": 0,
+        "width": 16,
+        "height": 20
+      }
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+// 游戏常量配置
+const GameConfig = {
+    // 窗口和分辨率
+    GAME_WIDTH: 686,
+    GAME_HEIGHT: 288,
+    TILE_SIZE: 24,
+    
+    // 地图尺寸
+    MAP_WIDTH: 4800,
+    MAP_HEIGHT: 288,
+    MAP_TILES_WIDTH: 200,
+    MAP_TILES_HEIGHT: 12,
+    
+    // 物理系统
+    GRAVITY: 500,
+    JUMP_HEIGHT: 200,
+    WALK_SPEED: 150,
+    RUN_SPEED: 250,
+    
+    // 玩家属性
+    PLAYER_MAX_HP: 100,
+    PLAYER_MAX_SP: 100,
+    PLAYER_ATTACK: 10,
+    PLAYER_COMBO_ATTACK: 15,
+    DEFENSE_REDUCTION: 0.3, // 防御时减伤70%
+    
+    // 精力消耗
+    SP_COST_RUN: 10, // per second
+    SP_COST_JUMP: 15,
+    SP_COST_ATTACK: 10,
+    SP_COST_COMBO: 15,
+    SP_COST_DEFENSE: 5, // per second
+    
+    // 精力恢复
+    SP_RECOVER_IDLE: 5, // per second
+    SP_RECOVER_WALK: 3, // per second
+    
+    // 敌人属性
+    SLIME: {
+        HP: 20,
+        ATTACK: 5,
+        PATROL_SPEED: 30,
+        DETECT_RADIUS: 80,
+        ATTACK_RADIUS: 40,
+        ATTACK_INTERVAL: 1500,
+        PATROL_RANGE: 50,
+        SCALE: 0.5,
+        FRAME_RATE: 8
+    },
+    
+    SKELETON: {
+        HP: 40,
+        ATTACK: 8,
+        PATROL_SPEED: 40,
+        CHASE_SPEED: 80,
+        DETECT_RADIUS: 120,
+        ATTACK_RADIUS: 50,
+        ATTACK_INTERVAL: 1200,
+        PATROL_RANGE: 100,
+        SCALE: 0.6,
+        FRAME_RATE: 10
+    },
+    
+    DEATH_BOSS: {
+        HP: 100,
+        ATTACK: 15,
+        MOVE_SPEED: 50,
+        ATTACK_RADIUS: 60,
+        ATTACK_INTERVAL: 2000,
+        SCALE: 1.0,
+        FRAME_RATE: 10
+    },
+    
+    // 掉落物
+    DROP_RATES: {
+        SLIME: {
+            COIN: { min: 1, max: 3, rate: 1.0 },
+            HEART: { min: 0, max: 1, rate: 0.2 }
+        },
+        SKELETON: {
+            COIN: { min: 2, max: 5, rate: 1.0 },
+            HEART: { min: 0, max: 1, rate: 0.3 }
+        },
+        DEATH_BOSS: {
+            COIN: { min: 10, max: 15, rate: 1.0 },
+            HEART: { min: 2, max: 3, rate: 1.0 }
+        }
+    },
+    
+    // 宝箱掉落
+    CHEST_DROPS: {
+        SMALL: {
+            COIN: { min: 5, max: 10 },
+            HEART: { chance: 0.4, amount: 1 }
+        },
+        LARGE: {
+            COIN: { min: 15, max: 25 },
+            HEART: { chance: 0.8, amount: { min: 2, max: 3 } }
+        }
+    },
+    
+    // 商店
+    SHOP: {
+        POTION_PRICE: 10,
+        POTION_HEAL: 20
+    },
+    
+    // 摄像机
+    CAMERA: {
+        DEAD_ZONE: 200,
+        LERP: 0.1,
+        MIN_X: 343,
+        MAX_X: 4457,
+        BOSS_LOCK_MIN: 4000,
+        BOSS_LOCK_MAX: 4500
+    },
+    
+    // 视差
+    PARALLAX: {
+        FAR: 0.2,
+        MID: 0.6,
+        NEAR: 1.0
+    },
+    
+    // 装饰物尺寸
+    DECORATION_SIZES: {
+        316: { width: 73, height: 19 },  // fence_1
+        317: { width: 72, height: 19 },  // fence_2
+        318: { width: 8, height: 3 },    // grass_1
+        319: { width: 10, height: 5 },   // grass_2
+        320: { width: 9, height: 4 },    // grass_3
+        321: { width: 23, height: 57 },  // lamp
+        322: { width: 20, height: 11 },  // rock_1
+        323: { width: 27, height: 12 },  // rock_2
+        324: { width: 45, height: 18 },  // rock_3
+        325: { width: 708, height: 128 }, // shop_anim
+        326: { width: 118, height: 98 },  // shop
+        327: { width: 22, height: 31 }    // sign
+    },
+    
+    // 碰撞装饰物ID
+    COLLISION_DECORATIONS: [322, 323, 324],
+    
+    // 动画帧率
+    DEFAULT_FRAME_RATE: 10,
+    
+    // 战斗相关
+    HIT_STUN_TIME: 500,      // 受击硬直时间 ms
+    INVINCIBLE_TIME: 1000,    // 无敌时间 ms
+    KNOCKBACK_DISTANCE: 30,   // 击退距离 px
+    
+    // 掉落物理
+    DROP_GRAVITY: 500,
+    DROP_BOUNCE: 0.5,
+    DROP_FRICTION: 0.8,
+    DROP_INITIAL_VX: [-50, 50],
+    DROP_INITIAL_VY: [-150, -100],
+    
+    // 掉落物存在时间
+    COIN_LIFETIME: 30000,     // 30秒
+    HEART_LIFETIME: 20000,    // 20秒
+    
+    // 出生点
+    SPAWN_POINT: { x: 58, y: 233 },
+    
+    // 区域划分
+    ZONES: {
+        ZONE1: { start: 0, end: 1600 },
+        ZONE2: { start: 1600, end: 3200 },
+        ZONE3: { start: 3200, end: 4500 }
+    }
+};
+
+// 输入键位配置
+const InputKeys = {
+    LEFT: 'A',
+    RIGHT: 'D',
+    UP: 'W',
+    DOWN: 'S',
+    JUMP: 'SPACE',
+    ATTACK: 'J',
+    DEFENSE: 'K',
+    INTERACT: 'J',
+    RUN: 'SHIFT'
+};

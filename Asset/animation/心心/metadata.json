@@ -1,0 +1,80 @@
+{
+  "export_mode": "atlas",
+  "export_type": "\u56fe\u96c6\u5bfc\u51fa",
+  "atlas_name": "heart",
+  "atlas_file": "heart.png",
+  "image_format": "PNG",
+  "atlas_size": {
+    "width": 106,
+    "height": 16
+  },
+  "sprite_count": 6,
+  "sprite_padding": 2,
+  "layout_info": {
+    "estimated_columns": 5,
+    "estimated_rows": 0,
+    "total_frames": 6,
+    "average_sprite_width": 16,
+    "average_sprite_height": 16,
+    "min_sprite_width": 16,
+    "max_sprite_width": 16,
+    "min_sprite_height": 16,
+    "max_sprite_height": 16
+  },
+  "sprites": [
+    {
+      "name": "sprite_320",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "name": "sprite_321",
+      "frame": {
+        "x": 18,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "name": "sprite_322",
+      "frame": {
+        "x": 36,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "name": "sprite_323",
+      "frame": {
+        "x": 54,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "name": "sprite_324",
+      "frame": {
+        "x": 72,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "name": "sprite_325",
+      "frame": {
+        "x": 90,
+        "y": 0,
+        "width": 16,
+        "height": 16
+      }
+    }
+  ]
+}

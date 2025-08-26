@@ -1,0 +1,80 @@
+{
+  "export_mode": "atlas",
+  "export_type": "\u56fe\u96c6\u5bfc\u51fa",
+  "atlas_name": "shop",
+  "atlas_file": "shop.png",
+  "image_format": "PNG",
+  "atlas_size": {
+    "width": 718,
+    "height": 128
+  },
+  "sprite_count": 6,
+  "sprite_padding": 2,
+  "layout_info": {
+    "estimated_columns": 5,
+    "estimated_rows": 0,
+    "total_frames": 6,
+    "average_sprite_width": 118,
+    "average_sprite_height": 128,
+    "min_sprite_width": 118,
+    "max_sprite_width": 118,
+    "min_sprite_height": 128,
+    "max_sprite_height": 128
+  },
+  "sprites": [
+    {
+      "name": "sprite_000",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    },
+    {
+      "name": "sprite_001",
+      "frame": {
+        "x": 120,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    },
+    {
+      "name": "sprite_002",
+      "frame": {
+        "x": 240,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    },
+    {
+      "name": "sprite_003",
+      "frame": {
+        "x": 360,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    },
+    {
+      "name": "sprite_004",
+      "frame": {
+        "x": 480,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    },
+    {
+      "name": "sprite_005",
+      "frame": {
+        "x": 600,
+        "y": 0,
+        "width": 118,
+        "height": 128
+      }
+    }
+  ]
+}

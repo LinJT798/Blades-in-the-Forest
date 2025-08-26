@@ -1,0 +1,36 @@
+{
+  "sprite_info": {
+    "name": "box_1",
+    "width": 16,
+    "height": 20
+  },
+  "layout": {
+    "columns": 4,
+    "rows": 1,
+    "padding": 2
+  },
+  "actions": {
+    "open": {
+      "frames": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "frame_count": 4
+    }
+  },
+  "frame_rate": 8
+}

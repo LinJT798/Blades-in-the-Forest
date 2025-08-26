@@ -1,0 +1,44 @@
+{
+  "sprite_info": {
+    "name": "coin",
+    "width": 16,
+    "height": 16
+  },
+  "layout": {
+    "columns": 6,
+    "rows": 1,
+    "padding": 2
+  },
+  "actions": {
+    "idle": {
+      "frames": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "frame_count": 6
+    }
+  },
+  "frame_rate": 10
+}

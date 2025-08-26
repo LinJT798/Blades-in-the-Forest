@@ -1,0 +1,25 @@
+{
+  "export_mode": "individual",
+  "export_type": "单图导出",
+  "sprite_count": 1,
+  "image_format": "PNG",
+  "statistics": {
+    "total_images": 1,
+    "min_width": 16,
+    "max_width": 16,
+    "min_height": 16,
+    "max_height": 16,
+    "average_width": 16,
+    "average_height": 16
+  },
+  "sprites": [
+    {
+      "index": 0,
+      "name": "sprite_316",
+      "file": "heart_pic000.png",
+      "width": 16,
+      "height": 16,
+      "size": "16x16"
+    }
+  ]
+}

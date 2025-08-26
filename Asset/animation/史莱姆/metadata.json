@@ -1,0 +1,197 @@
+{
+  "export_mode": "atlas",
+  "export_type": "\u56fe\u96c6\u5bfc\u51fa",
+  "atlas_name": "slime",
+  "atlas_file": "slime.png",
+  "image_format": "PNG",
+  "atlas_size": {
+    "width": 1993,
+    "height": 56
+  },
+  "sprite_count": 19,
+  "sprite_padding": 2,
+  "layout_info": {
+    "estimated_columns": 18,
+    "estimated_rows": 0,
+    "total_frames": 19,
+    "average_sprite_width": 103,
+    "average_sprite_height": 56,
+    "min_sprite_width": 103,
+    "max_sprite_width": 103,
+    "min_sprite_height": 56,
+    "max_sprite_height": 56
+  },
+  "sprites": [
+    {
+      "name": "sprite_000",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_001",
+      "frame": {
+        "x": 105,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_002",
+      "frame": {
+        "x": 210,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_003",
+      "frame": {
+        "x": 315,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_004",
+      "frame": {
+        "x": 420,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_005",
+      "frame": {
+        "x": 525,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_006",
+      "frame": {
+        "x": 630,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_007",
+      "frame": {
+        "x": 735,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_008",
+      "frame": {
+        "x": 840,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_009",
+      "frame": {
+        "x": 945,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_010",
+      "frame": {
+        "x": 1050,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_011",
+      "frame": {
+        "x": 1155,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_012",
+      "frame": {
+        "x": 1260,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_013",
+      "frame": {
+        "x": 1365,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_014",
+      "frame": {
+        "x": 1470,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_015",
+      "frame": {
+        "x": 1575,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_016",
+      "frame": {
+        "x": 1680,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_017",
+      "frame": {
+        "x": 1785,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    },
+    {
+      "name": "sprite_018",
+      "frame": {
+        "x": 1890,
+        "y": 0,
+        "width": 103,
+        "height": 56
+      }
+    }
+  ]
+}
