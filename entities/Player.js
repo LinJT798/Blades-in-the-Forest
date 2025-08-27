@@ -215,12 +215,14 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         }
         
         // 地面动画
-        const speed = Math.abs(this.body.velocity.x);
+        // 使用实际的输入状态而不是速度，避免物理惯性导致的延迟
+        const isMoving = this.keys.left.isDown || this.keys.right.isDown;
         
-        if (speed > 10) {
+        if (isMoving) {
             this.animationManager.playAnimation(this, 'run', true);
         } else {
-            this.animationManager.playAnimation(this, 'idle', true);
+            // idle动画不应该设置ignoreIfPlaying，否则无法从run切换到idle
+            this.animationManager.playAnimation(this, 'idle', false);
         }
     }
     

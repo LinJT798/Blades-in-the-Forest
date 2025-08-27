@@ -101,6 +101,11 @@ class AnimationManager {
             return true;
         }
         
+        // 特殊处理：允许从run切换到idle（停止移动的情况）
+        if (currentAnimKey === 'run' && newAnimation === 'idle') {
+            return true;
+        }
+        
         // 新动画优先级更高时播放
         return newPriority >= currentPriority;
     }
