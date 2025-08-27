@@ -219,32 +219,67 @@ class PreloadScene extends Phaser.Scene {
     }
     
     createPlayerAnimations() {
-        const config = this.animationConfigs.player_1;
-        if (!config) return;
-        
-        const actions = config.actions;
-        
-        // 遍历所有动作创建动画
-        for (let actionName in actions) {
-            const action = actions[actionName];
-            const frames = [];
+        // 创建 player_1 的动画
+        const config1 = this.animationConfigs.player_1;
+        if (config1) {
+            const actions = config1.actions;
             
-            // 将动作名标准化（空格替换为下划线）
-            const animKey = 'player_' + actionName.replace(/ /g, '_');
-            
-            // 生成帧序列
-            for (let frame of action.frames) {
-                const frameIndex = frame[0] * config.layout.columns + frame[1];
-                frames.push({ key: 'player_1', frame: frameIndex });
+            // 遍历所有动作创建动画
+            for (let actionName in actions) {
+                const action = actions[actionName];
+                const frames = [];
+                
+                // 将动作名标准化（空格替换为下划线）
+                const animKey = 'player_' + actionName.replace(/ /g, '_');
+                
+                // 生成帧序列
+                for (let frame of action.frames) {
+                    const frameIndex = frame[0] * config1.layout.columns + frame[1];
+                    frames.push({ key: 'player_1', frame: frameIndex });
+                }
+                
+                // 创建动画
+                this.anims.create({
+                    key: animKey,
+                    frames: frames,
+                    frameRate: config1.frame_rate || 10,
+                    repeat: ['idle', 'run'].includes(actionName) ? -1 : 0
+                });
             }
+        }
+        
+        // 创建 player_2 的动画（墙壁滑行等特殊动画）
+        const config2 = this.animationConfigs.player_2;
+        if (config2) {
+            const actions = config2.actions;
             
-            // 创建动画
-            this.anims.create({
-                key: animKey,
-                frames: frames,
-                frameRate: config.frame_rate || 10,
-                repeat: ['idle', 'run'].includes(actionName) ? -1 : 0
-            });
+            // 遍历所有动作创建动画
+            for (let actionName in actions) {
+                const action = actions[actionName];
+                const frames = [];
+                
+                // 将动作名标准化（空格替换为下划线）
+                const animKey = 'player_' + actionName.replace(/ /g, '_');
+                
+                // 生成帧序列
+                for (let frame of action.frames) {
+                    const frameIndex = frame[0] * config2.layout.columns + frame[1];
+                    frames.push({ key: 'player_2', frame: frameIndex });
+                }
+                
+                // 如果动画已存在（来自player_1），跳过
+                if (this.anims.exists(animKey)) {
+                    continue;
+                }
+                
+                // 创建动画
+                this.anims.create({
+                    key: animKey,
+                    frames: frames,
+                    frameRate: config2.frame_rate || 10,
+                    repeat: ['wall_slide_loop', 'sliding_loop', 'walking'].includes(actionName) ? -1 : 0
+                });
+            }
         }
     }
     

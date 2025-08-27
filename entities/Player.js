@@ -15,6 +15,15 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(23, 33);
         this.body.setOffset(16, 22);
         
+        // 墙壁检测缓存
+        this.wallDetectionCache = {
+            lastCheckTime: 0,
+            lastX: 0,
+            lastY: 0,
+            result: false,
+            checkInterval: 100  // 每100ms最多检测一次
+        };
+        
         // 玩家属性
         this.maxHP = GameConfig.PLAYER_MAX_HP;
         this.maxSP = GameConfig.PLAYER_MAX_SP;
@@ -144,7 +153,18 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             this.states.isDefending = false;
         }
         
-        // 移动输入
+        // 墙壁滑行状态特殊处理
+        if (this.states.isOnWall) {
+            // 贴墙时只处理跳跃输入
+            if (this.keys.jump.isDown && this.keys.jump.getDuration() < 100) {
+                this.wallJump();
+            }
+            // 贴墙时不处理水平移动，保持贴墙
+            this.body.setVelocityX(0);
+            return;
+        }
+        
+        // 移动输入（只在非贴墙状态下处理）
         let velocityX = 0;
         const moveSpeed = this.states.isDefending ? 75 : 
                          (this.states.isRunning ? GameConfig.RUN_SPEED : GameConfig.WALK_SPEED);
@@ -173,11 +193,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 攻击
         if (this.keys.attack.isDown && this.keys.attack.getDuration() < 100) {
             this.attack();
-        }
-        
-        // 墙跳
-        if (this.states.isOnWall && this.keys.jump.isDown && this.keys.jump.getDuration() < 100) {
-            this.wallJump();
         }
     }
     
@@ -209,7 +224,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 空中动画
         if (!isOnGround) {
-            if (this.body.velocity.y < 0) {
+            // 如果正在贴墙滑行，动画由 checkWallSlide 控制
+            if (this.states.isOnWall) {
+                // 贴墙滑行动画已经在 checkWallSlide 中处理
+                return;
+            } else if (this.body.velocity.y < 0) {
                 this.animationManager.playAnimation(this, 'flying_up', true);
             } else {
                 this.animationManager.playAnimation(this, 'falling', true);
@@ -248,13 +267,30 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     wallJump() {
         if (this.currentSP >= GameConfig.SP_COST_JUMP) {
-            // 向反方向弹跳
-            const jumpDirection = this.states.facingRight ? -1 : 1;
-            this.body.setVelocityX(jumpDirection * 200);
-            this.body.setVelocityY(-Math.sqrt(2 * GameConfig.GRAVITY * GameConfig.JUMP_HEIGHT * 0.8));
+            // 检查方向键输入来决定跳跃方向
+            let jumpX = 0;
+            let jumpY = -Math.sqrt(2 * GameConfig.GRAVITY * GameConfig.JUMP_HEIGHT * 0.8);
             
-            // 消耗精力
-            this.consumeSP(GameConfig.SP_COST_JUMP);
+            if (this.keys.left.isDown || this.keys.right.isDown) {
+                // 有方向键：向对应方向跳
+                if (this.keys.left.isDown) {
+                    jumpX = -200;
+                } else if (this.keys.right.isDown) {
+                    jumpX = 200;
+                }
+            } else {
+                // 没有方向键：直接向下掉落
+                jumpY = 50; // 小的向下速度，让玩家脱离墙壁
+                jumpX = this.states.wallSide === 'left' ? 10 : -10; // 轻微推离墙壁
+            }
+            
+            this.body.setVelocityX(jumpX);
+            this.body.setVelocityY(jumpY);
+            
+            // 消耗精力（向下掉落不消耗）
+            if (this.keys.left.isDown || this.keys.right.isDown) {
+                this.consumeSP(GameConfig.SP_COST_JUMP);
+            }
             
             this.states.isOnWall = false;
             this.states.isJumping = true;
@@ -471,17 +507,105 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     checkWallSlide() {
-        // 检查是否贴墙
-        const touchingWall = (this.body.blocked.left || this.body.blocked.right) && 
-                            !this.body.blocked.down;
+        // 前置条件1：必须在空中
+        const isInAir = !this.body.blocked.down && !this.body.touching.down;
+        if (!isInAir) {
+            // 在地面上，直接重置墙壁状态并返回
+            this.states.isOnWall = false;
+            this.wallDetectionCache.result = false;
+            return;
+        }
         
-        if (touchingWall && this.keys.up.isDown && this.body.velocity.y > 0) {
-            this.states.isOnWall = true;
-            this.body.setVelocityY(Math.min(this.body.velocity.y, 50)); // 减缓下落速度
-            this.animationManager.playAnimation(this, 'wall_slide_loop', true);
+        // 前置条件2：必须正在下落
+        const isFalling = this.body.velocity.y > 0;
+        if (!isFalling) {
+            // 还在上升阶段，不激活墙壁滑行
+            this.states.isOnWall = false;
+            return;
+        }
+        
+        // 到这里说明：在空中 + 正在下落
+        // 现在进行墙壁检测
+        const touchingWall = this.detectWallAlignment();
+        
+        if (touchingWall) {
+            // 激活墙壁滑行
+            if (!this.states.isOnWall) {
+                // 刚开始贴墙，播放开始动画
+                this.states.isOnWall = true;
+                this.animationManager.playAnimation(this, 'wall_slide_start', false);
+            }
+            
+            // 减缓下落速度
+            this.body.setVelocityY(Math.min(this.body.velocity.y, 50));
+            
+            // wall_slide_start 播放完后播放循环动画
+            if (!this.animationManager.isAnimationPlaying(this, 'wall_slide_start')) {
+                this.animationManager.playAnimation(this, 'wall_slide_loop', true);
+            }
         } else {
             this.states.isOnWall = false;
         }
+    }
+    
+    // 检测墙壁对齐（带缓存优化）
+    detectWallAlignment() {
+        const now = Date.now();
+        const positionChanged = Math.abs(this.x - this.wallDetectionCache.lastX) > 5 ||
+                               Math.abs(this.y - this.wallDetectionCache.lastY) > 5;
+        
+        // 如果位置没有显著变化且距离上次检测时间很短，使用缓存结果
+        if (!positionChanged && now - this.wallDetectionCache.lastCheckTime < this.wallDetectionCache.checkInterval) {
+            return this.wallDetectionCache.result;
+        }
+        
+        // 获取地块层
+        const tileLayer = this.scene.mapLoader?.getTileLayer();
+        if (!tileLayer) {
+            this.wallDetectionCache.result = false;
+            return false;
+        }
+        
+        // 计算需要至少90%的高度贴合
+        const minTilesRequired = Math.ceil((this.body.height * 0.9) / 24); // 24是tile高度
+        
+        // 检测左边墙壁（玩家碰撞盒左边外侧1-2像素的位置）
+        const leftTiles = tileLayer.getTilesWithinWorldXY(
+            this.body.x - 2,      // 左边2像素
+            this.body.y,          // 碰撞盒顶部
+            2,                    // 检测宽度
+            this.body.height,     // 碰撞盒高度
+            { isColliding: true } // 只检测有碰撞的瓦片
+        );
+        
+        // 检测右边墙壁
+        const rightTiles = tileLayer.getTilesWithinWorldXY(
+            this.body.right,      // 碰撞盒右边缘
+            this.body.y,          
+            2,                    
+            this.body.height,
+            { isColliding: true }
+        );
+        
+        // 要求至少70%的高度有瓦片贴合
+        const result = leftTiles.length >= minTilesRequired || rightTiles.length >= minTilesRequired;
+        
+        // 更新缓存
+        this.wallDetectionCache.lastCheckTime = now;
+        this.wallDetectionCache.lastX = this.x;
+        this.wallDetectionCache.lastY = this.y;
+        this.wallDetectionCache.result = result;
+        
+        // 如果检测到墙壁，记录是哪一边
+        if (result) {
+            if (leftTiles.length >= minTilesRequired) {
+                this.states.wallSide = 'left';
+            } else {
+                this.states.wallSide = 'right';
+            }
+        }
+        
+        return result;
     }
     
     die() {
