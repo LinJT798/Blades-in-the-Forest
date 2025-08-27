@@ -147,10 +147,8 @@ class CombatSystem {
             target.clearTint();
         });
         
-        // 如果目标有受击动画
-        if (target.animationManager) {
-            target.animationManager.playAnimation(target, 'be_attacked');
-        }
+        // 不要在这里播放受击动画，让实体自己的updateAnimation处理
+        // 这样可以避免动画冲突
         
         // 短暂无敌
         target.isInvincible = true;

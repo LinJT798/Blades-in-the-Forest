@@ -13,7 +13,7 @@ const GameConfig = {
     
     // 物理系统
     GRAVITY: 500,
-    JUMP_HEIGHT: 200,
+    JUMP_HEIGHT: 100,  // 降低跳跃高度
     WALK_SPEED: 150,
     RUN_SPEED: 250,
     
@@ -26,7 +26,7 @@ const GameConfig = {
     
     // 精力消耗
     SP_COST_RUN: 10, // per second
-    SP_COST_JUMP: 15,
+    SP_COST_JUMP: 5,  // 降低跳跃消耗
     SP_COST_ATTACK: 10,
     SP_COST_COMBO: 15,
     SP_COST_DEFENSE: 5, // per second

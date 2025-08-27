@@ -185,15 +185,15 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
-        // 受击状态
-        if (this.states.isStunned) {
+        // 受击状态 - 只在刚受击时播放，不阻止后续动画更新
+        if (this.states.isStunned && !this.animationManager.isAnimationPlaying(this, 'be_attacked')) {
             this.animationManager.playAnimation(this, 'be_attacked');
-            return;
+            // 不要return，让后续动画可以替换
         }
         
         // 防御状态
         if (this.states.isDefending) {
-            this.animationManager.playAnimation(this, 'shield_defense');
+            this.animationManager.playAnimation(this, 'shield_defense', true);
             return;
         }
         
@@ -206,9 +206,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 空中动画
         if (!isOnGround) {
-            if (this.body.velocity.y < -50) {
+            if (this.body.velocity.y < 0) {
                 this.animationManager.playAnimation(this, 'flying_up', true);
-            } else if (this.body.velocity.y > 50) {
+            } else {
                 this.animationManager.playAnimation(this, 'falling', true);
             }
             return;
@@ -218,11 +218,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         const speed = Math.abs(this.body.velocity.x);
         
         if (speed > 10) {
-            if (this.states.isRunning) {
-                this.animationManager.playAnimation(this, 'run', true);
-            } else {
-                this.animationManager.playAnimation(this, 'run', true); // 使用run动画代替walking
-            }
+            this.animationManager.playAnimation(this, 'run', true);
         } else {
             this.animationManager.playAnimation(this, 'idle', true);
         }

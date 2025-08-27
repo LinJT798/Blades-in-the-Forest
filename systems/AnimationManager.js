@@ -8,16 +8,16 @@ class AnimationManager {
             'attack_1hit': 80,
             'combo_attack': 80,
             'shield_defense': 75,
-            'jump_prepare': 70,
-            'flying_up': 70,
-            'falling': 70,
-            'landing': 70,
-            'wall_slide_start': 65,
-            'wall_slide_loop': 65,
+            'jump_prepare': 60,
+            'landing': 60,
+            'wall_slide_start': 55,
+            'wall_slide_loop': 55,
             'run': 50,
             'walking': 40,
+            'flying_up': 35,  // 降低空中动画优先级
+            'falling': 35,    // 这样落地后可以切换到idle或run
             'crouch': 30,
-            'idle': 10
+            'idle': 20       // 提高idle优先级
         };
     }
     
@@ -79,13 +79,26 @@ class AnimationManager {
         
         const currentAnimKey = this.extractAnimationKey(sprite.anims.currentAnim.key);
         
+        // 死亡动画不能被打断
+        if (currentAnimKey === 'death') {
+            return false;
+        }
+        
+        // 如果当前动画已经播放完毕（非循环动画），允许切换到任何动画
+        if (!sprite.anims.isPlaying || 
+            (sprite.anims.currentAnim && sprite.anims.currentAnim.repeat === 0 && 
+             sprite.anims.getProgress() === 1)) {
+            return true;
+        }
+        
         // 获取优先级
         const currentPriority = this.animationPriorities[currentAnimKey] || 0;
         const newPriority = this.animationPriorities[newAnimation] || 0;
         
-        // 死亡动画不能被打断
-        if (currentAnimKey === 'death') {
-            return false;
+        // 如果当前是一次性动画（如be_attacked）且已经播放了一段时间，允许更低优先级的常规动画
+        const oneTimeAnims = ['be_attacked', 'attack_1hit', 'combo_attack', 'jump_prepare', 'landing'];
+        if (oneTimeAnims.includes(currentAnimKey) && sprite.anims.getProgress() > 0.8) {
+            return true;
         }
         
         // 新动画优先级更高时播放

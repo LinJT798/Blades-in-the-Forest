@@ -194,49 +194,53 @@ class MapLoader {
             objectLayer.objects.forEach(obj => {
                 const type = obj.type || obj.name;
                 
+                // Tiled对象坐标不需要修正，直接使用
+                // TMJ格式中的坐标已经是正确的像素坐标
+                const correctedY = obj.y;
+                
                 switch(type) {
                     case '出生点':
                     case 'spawn':
-                        this.objectGroups.spawnPoint = { x: obj.x, y: obj.y };
+                        this.objectGroups.spawnPoint = { x: obj.x, y: correctedY };
                         break;
                         
                     case '史莱姆':
                     case 'slime':
-                        this.objectGroups.enemies.slimes.push({ x: obj.x, y: obj.y });
+                        this.objectGroups.enemies.slimes.push({ x: obj.x, y: correctedY });
                         break;
                         
                     case '骷髅兵':
                     case 'skeleton':
                     case 'skull':
-                        this.objectGroups.enemies.skeletons.push({ x: obj.x, y: obj.y });
+                        this.objectGroups.enemies.skeletons.push({ x: obj.x, y: correctedY });
                         break;
                         
                     case '死神':
                     case 'boss':
                     case 'death':
-                        this.objectGroups.enemies.boss = { x: obj.x, y: obj.y };
+                        this.objectGroups.enemies.boss = { x: obj.x, y: correctedY };
                         break;
                         
                     case '小宝箱':
                     case 'chest_small':
-                        this.objectGroups.chests.small.push({ x: obj.x, y: obj.y });
+                        this.objectGroups.chests.small.push({ x: obj.x, y: correctedY });
                         break;
                         
                     case '大宝箱':
                     case 'chest_large':
-                        this.objectGroups.chests.large.push({ x: obj.x, y: obj.y });
+                        this.objectGroups.chests.large.push({ x: obj.x, y: correctedY });
                         break;
                         
                     case '商店':
                     case 'shop':
-                        this.objectGroups.shops.push({ x: obj.x, y: obj.y });
+                        this.objectGroups.shops.push({ x: obj.x, y: correctedY });
                         break;
                         
                     case '教学':
                     case 'tutorial':
                         this.objectGroups.tutorials.push({ 
                             x: obj.x, 
-                            y: obj.y,
+                            y: correctedY,
                             width: obj.width,
                             height: obj.height,
                             properties: obj.properties
