@@ -144,8 +144,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.isAttacking = true;
         this.lastAttackTime = time;
         
-        // 播放攻击动画
-        this.animationManager.playAnimation(this, 'fight');
+        // 强制播放攻击动画
+        this.stop(); // 停止当前动画
+        this.play(this.animationManager.getFullAnimationKey(this, 'fight'));
         
         // 延迟触发攻击判定
         this.scene.time.delayedCall(this.getAttackFrame() * 100, () => {
@@ -154,8 +155,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             }
         });
         
-        // 攻击结束
-        this.scene.time.delayedCall(this.attackInterval * 0.8, () => {
+        // 攻击动画持续时间后重置状态
+        // fight动画有7帧，帧率8fps，大约875ms
+        this.scene.time.delayedCall(875, () => {
             this.isAttacking = false;
         });
     }

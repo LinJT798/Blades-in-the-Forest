@@ -7,6 +7,7 @@ class AnimationManager {
             'be_attacked': 90,
             'attack_1hit': 80,
             'combo_attack': 80,
+            'fight': 80,      // 敌人攻击动画，高优先级
             'shield_defense': 75,
             'jump_prepare': 60,
             'landing': 60,
@@ -79,6 +80,11 @@ class AnimationManager {
         
         const currentAnimKey = this.extractAnimationKey(sprite.anims.currentAnim.key);
         
+        // 如果要播放相同的动画，不需要重新播放
+        if (currentAnimKey === newAnimation && sprite.anims.isPlaying) {
+            return false;
+        }
+        
         // 死亡动画不能被打断
         if (currentAnimKey === 'death') {
             return false;
@@ -101,8 +107,9 @@ class AnimationManager {
             return true;
         }
         
-        // 特殊处理：允许从run切换到idle（停止移动的情况）
-        if (currentAnimKey === 'run' && newAnimation === 'idle') {
+        // 特殊处理：允许在idle和run之间自由切换
+        if ((currentAnimKey === 'run' && newAnimation === 'idle') || 
+            (currentAnimKey === 'idle' && newAnimation === 'run')) {
             return true;
         }
         

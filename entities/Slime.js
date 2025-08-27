@@ -42,12 +42,8 @@ class Slime extends Enemy {
             return;
         }
         
-        if (this.isChasing) {
-            // 史莱姆追击时播放fight动画
-            this.animationManager.playAnimation(this, 'fight', true);
-        } else {
-            // 巡逻时播放idle动画
-            this.animationManager.playAnimation(this, 'idle', true);
-        }
+        // 史莱姆只有idle动画用于移动和待机
+        // fight动画只在攻击时播放，不循环
+        this.animationManager.playAnimation(this, 'idle', true);
     }
 }

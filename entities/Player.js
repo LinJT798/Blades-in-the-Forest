@@ -65,6 +65,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 设置深度
         this.setDepth(10);
+        
+        // 播放初始idle动画
+        this.animationManager.playAnimation(this, 'idle', true);
     }
     
     setupInputs() {
@@ -221,8 +224,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         if (isMoving) {
             this.animationManager.playAnimation(this, 'run', true);
         } else {
-            // idle动画不应该设置ignoreIfPlaying，否则无法从run切换到idle
-            this.animationManager.playAnimation(this, 'idle', false);
+            // idle动画应该循环播放
+            this.animationManager.playAnimation(this, 'idle', true);
         }
     }
     

@@ -256,10 +256,6 @@ class CombatSystem {
     }
     
     showAttackEffect(x, y) {
-        // 创建攻击特效
-        const effect = this.scene.add.sprite(x, y, null);
-        effect.setDepth(15);
-        
         // 简单的闪光效果
         const flash = this.scene.add.circle(x, y, 30, 0xffffff, 0.5);
         flash.setDepth(15);
@@ -273,7 +269,6 @@ class CombatSystem {
             ease: 'Power2',
             onComplete: () => {
                 flash.destroy();
-                effect.destroy();
             }
         });
     }
