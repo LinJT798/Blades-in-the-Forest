@@ -12,8 +12,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 设置物理属性
         this.setCollideWorldBounds(true);
         this.setGravityY(0); // 使用世界重力
-        this.body.setSize(40, 50);
-        this.body.setOffset(8, 6);
+        this.body.setSize(23, 33);
+        this.body.setOffset(16, 22);
         
         // 玩家属性
         this.maxHP = GameConfig.PLAYER_MAX_HP;

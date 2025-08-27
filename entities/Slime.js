@@ -6,7 +6,7 @@ class Slime extends Enemy {
         
         // 设置碰撞盒
         this.body.setSize(80, 40);
-        this.body.setOffset(12, 8);
+        this.body.setOffset(12, 12);
         
         // 初始动画
         this.animationManager.playAnimation(this, 'idle', true);

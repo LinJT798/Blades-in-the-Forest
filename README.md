@@ -24,9 +24,16 @@
    python3 server.py
    ```
    
+   **指定端口运行（如果8000端口被占用）：**
+   ```bash
+   python3 server.py 8888
+   ```
+   
    **Windows用户：**
    ```bash
    python server.py
+   # 或指定端口
+   python server.py 8888
    ```
 
 3. **浏览器会自动打开游戏**

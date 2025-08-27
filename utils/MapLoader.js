@@ -131,11 +131,8 @@ class MapLoader {
             // 设置原点为底部中心
             sprite.setOrigin(0.5, 1);
             
-            // 如果是需要碰撞的装饰物（rock_1, rock_2, rock_3）
-            if (GameConfig.COLLISION_DECORATIONS.includes(decorationId)) {
-                this.scene.physics.add.existing(sprite, true);
-                sprite.body.setSize(targetSize.width * 0.8, targetSize.height * 0.8);
-            }
+            // 装饰物不设置碰撞，纯粹用于视觉效果
+            // 所有装饰物都不参与物理碰撞
             
             // 设置深度
             sprite.setDepth(2);

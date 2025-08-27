@@ -11,7 +11,7 @@ class Game {
                 default: 'arcade',
                 arcade: {
                     gravity: { y: GameConfig.GRAVITY },
-                    debug: false
+                    debug: false  // 开启debug模式查看碰撞体
                 }
             },
             scale: {

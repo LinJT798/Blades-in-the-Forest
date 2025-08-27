@@ -13,9 +13,9 @@ const GameConfig = {
     
     // 物理系统
     GRAVITY: 500,
-    JUMP_HEIGHT: 100,  // 降低跳跃高度
-    WALK_SPEED: 150,
-    RUN_SPEED: 250,
+    JUMP_HEIGHT: 50,  // 降低跳跃高度
+    WALK_SPEED: 100,
+    RUN_SPEED: 200,
     
     // 玩家属性
     PLAYER_MAX_HP: 100,
@@ -138,8 +138,8 @@ const GameConfig = {
         327: { width: 22, height: 31 }    // sign
     },
     
-    // 碰撞装饰物ID
-    COLLISION_DECORATIONS: [322, 323, 324],
+    // 碰撞装饰物ID（已禁用，所有装饰物都不设置碰撞）
+    COLLISION_DECORATIONS: [],
     
     // 动画帧率
     DEFAULT_FRAME_RATE: 10,
