@@ -59,7 +59,7 @@ class MenuScene extends Phaser.Scene {
             this.cameras.main.width,
             this.cameras.main.height,
             'bg_layer_1'
-        ).setOrigin(0, 0).setScrollFactor(0);
+        ).setOrigin(0, 0).setScrollFactor(0).setDepth(-3);
         
         // 添加中景层
         this.bgLayer2 = this.add.tileSprite(
@@ -67,15 +67,15 @@ class MenuScene extends Phaser.Scene {
             this.cameras.main.width,
             this.cameras.main.height,
             'bg_layer_2'
-        ).setOrigin(0, 0).setScrollFactor(0).setAlpha(0.8);
+        ).setOrigin(0, 0).setScrollFactor(0).setDepth(-2);
         
-        // 添加近景层
+        // 添加近景层 - 不设置透明度
         this.bgLayer3 = this.add.tileSprite(
             0, 0,
             this.cameras.main.width,
             this.cameras.main.height,
             'bg_layer_3'
-        ).setOrigin(0, 0).setScrollFactor(0).setAlpha(0.6);
+        ).setOrigin(0, 0).setScrollFactor(0).setDepth(-1);
         
         this.parallaxLayers = [
             { layer: this.bgLayer1, speed: GameConfig.PARALLAX.FAR * 0.2 },
@@ -85,16 +85,12 @@ class MenuScene extends Phaser.Scene {
     }
     
     startParallaxScroll() {
-        // 自动滚动背景
-        this.time.addEvent({
-            delay: 16,
-            callback: () => {
-                this.parallaxLayers.forEach(item => {
-                    item.layer.tilePositionX += item.speed;
-                });
-            },
-            loop: true
-        });
+        // 初始化滚动速度（像素/秒）
+        this.scrollSpeeds = [
+            10,  // 远景层速度
+            20,  // 中景层速度  
+            30   // 近景层速度
+        ];
     }
     
     createButton(x, y, text, callback) {
@@ -178,7 +174,16 @@ class MenuScene extends Phaser.Scene {
         }
     }
     
-    update() {
-        // 场景更新逻辑（如需要）
+    update(time, delta) {
+        // 使用delta时间实现平滑的背景滚动
+        if (this.parallaxLayers && this.scrollSpeeds) {
+            // delta是上一帧到这一帧的时间（毫秒）
+            const deltaSeconds = delta / 1000;
+            
+            this.parallaxLayers.forEach((item, index) => {
+                // 根据时间增量更新位置，确保平滑滚动
+                item.layer.tilePositionX += this.scrollSpeeds[index] * deltaSeconds;
+            });
+        }
     }
 }

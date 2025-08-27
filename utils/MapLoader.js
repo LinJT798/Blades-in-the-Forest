@@ -35,29 +35,29 @@ class MapLoader {
     }
     
     createParallaxBackground() {
-        // 远景层
+        // 远景层 - 不使用scrollFactor，通过updateParallax手动控制
         const bgLayer1 = this.scene.add.tileSprite(
             0, 0,
-            GameConfig.MAP_WIDTH,
-            GameConfig.MAP_HEIGHT,
+            GameConfig.GAME_WIDTH,
+            GameConfig.GAME_HEIGHT,
             'bg_layer_1'
-        ).setOrigin(0, 0).setScrollFactor(GameConfig.PARALLAX.FAR, 1);
+        ).setOrigin(0, 0).setScrollFactor(0, 0).setDepth(-3);
         
         // 中景层
         const bgLayer2 = this.scene.add.tileSprite(
             0, 0,
-            GameConfig.MAP_WIDTH,
-            GameConfig.MAP_HEIGHT,
+            GameConfig.GAME_WIDTH,
+            GameConfig.GAME_HEIGHT,
             'bg_layer_2'
-        ).setOrigin(0, 0).setScrollFactor(GameConfig.PARALLAX.MID, 1);
+        ).setOrigin(0, 0).setScrollFactor(0, 0).setDepth(-2);
         
         // 近景层
         const bgLayer3 = this.scene.add.tileSprite(
             0, 0,
-            GameConfig.MAP_WIDTH,
-            GameConfig.MAP_HEIGHT,
+            GameConfig.GAME_WIDTH,
+            GameConfig.GAME_HEIGHT,
             'bg_layer_3'
-        ).setOrigin(0, 0).setScrollFactor(GameConfig.PARALLAX.NEAR, 1);
+        ).setOrigin(0, 0).setScrollFactor(0, 0).setDepth(-1);
         
         this.parallaxLayers = [bgLayer1, bgLayer2, bgLayer3];
     }
@@ -285,14 +285,16 @@ class MapLoader {
     
     updateParallax(camera) {
         // 更新视差背景的位置
+        // tilePositionX 控制纹理的水平偏移，实现视差滚动
         this.parallaxLayers.forEach((layer, index) => {
             const parallaxFactor = [
-                GameConfig.PARALLAX.FAR,
-                GameConfig.PARALLAX.MID,
-                GameConfig.PARALLAX.NEAR
+                GameConfig.PARALLAX.FAR,  // 0.2 - 远景层移动最慢
+                GameConfig.PARALLAX.MID,  // 0.6 - 中景层中速
+                GameConfig.PARALLAX.NEAR  // 1.0 - 近景层跟随摄像机
             ][index];
             
-            layer.tilePositionX = camera.scrollX * (1 - parallaxFactor);
+            // 视差效果：背景层移动速度 = 摄像机移动速度 * 视差因子
+            layer.tilePositionX = camera.scrollX * parallaxFactor;
         });
     }
     

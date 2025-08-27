@@ -7,6 +7,10 @@ class Game {
             width: GameConfig.GAME_WIDTH,
             height: GameConfig.GAME_HEIGHT,
             pixelArt: true,
+            fps: {
+                target: 60,    // 目标帧率60fps
+                forceSetTimeOut: false  // 使用requestAnimationFrame而不是setTimeout
+            },
             physics: {
                 default: 'arcade',
                 arcade: {

@@ -10,7 +10,8 @@
       "Bash(git remote add:*)",
       "Bash(git add:*)",
       "Bash(jq:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
