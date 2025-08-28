@@ -232,8 +232,13 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         // 播放死亡动画
         this.animationManager.playAnimation(this, 'death');
         
-        // 触发掉落
+        // 立即触发掉落
         this.dropItems();
+        
+        // 延迟销毁敌人精灵
+        this.scene.time.delayedCall(2000, () => {
+            this.destroy();
+        });
     }
     
     dropItems() {

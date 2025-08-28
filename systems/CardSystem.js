@@ -6,7 +6,7 @@ class CardSystem {
                 id: 'heal_instant',
                 name: '生命恢复',
                 description: '立即恢复50点生命值',
-                price: 30,
+                price: 5,
                 image: 'card_heal',
                 effect: (player) => {
                     player.heal(50);
@@ -17,7 +17,7 @@ class CardSystem {
                 id: 'defense_up',
                 name: '防御强化',
                 description: '防御减伤提高10%',
-                price: 40,
+                price: 7,
                 image: 'card_defense',
                 effect: (player) => {
                     // 将减伤从70%提高到80%
@@ -32,7 +32,7 @@ class CardSystem {
                 id: 'energy_regen',
                 name: '精力涌动',
                 description: '精力回复速度提升50%',
-                price: 35,
+                price: 7,
                 image: 'card_energy',
                 effect: (player) => {
                     if (!window.gameData.buffs) {
@@ -46,7 +46,7 @@ class CardSystem {
                 id: 'lifesteal',
                 name: '吸血攻击',
                 description: '攻击时回复造成伤害的20%生命值',
-                price: 45,
+                price: 8,
                 image: 'card_lifesteal',
                 effect: (player) => {
                     if (!window.gameData.buffs) {
@@ -60,7 +60,7 @@ class CardSystem {
                 id: 'regen_idle',
                 name: '静息回复',
                 description: '静止时每秒回复2点生命值',
-                price: 25,
+                price: 10,
                 image: 'card_regen',
                 effect: (player) => {
                     if (!window.gameData.buffs) {

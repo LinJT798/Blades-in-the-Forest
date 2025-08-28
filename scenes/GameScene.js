@@ -166,6 +166,16 @@ class GameScene extends Phaser.Scene {
     }
     
     setupCollisions() {
+        // 掉落物与地面碰撞
+        this.physics.add.collider(this.coinsGroup, this.tileLayer);
+        this.physics.add.collider(this.heartsGroup, this.tileLayer);
+        
+        // 掉落物与装饰物碰撞（只与有碰撞的装饰物）
+        if (this.decorations && this.decorations.length > 0) {
+            this.physics.add.collider(this.coinsGroup, this.decorations);
+            this.physics.add.collider(this.heartsGroup, this.decorations);
+        }
+        
         // 玩家与金币碰撞
         this.physicsSystem.setupPickupOverlap(
             this.player,
@@ -438,6 +448,54 @@ class GameScene extends Phaser.Scene {
         const spawnPoint = this.mapLoader.getSpawnPoint();
         this.player.respawn(spawnPoint.x, spawnPoint.y);
         this.isGameOver = false;
+    }
+    
+    spawnCoins(x, y, count) {
+        // 生成多个金币，带有物理抛物线效果
+        for (let i = 0; i < count; i++) {
+            // 为每个金币添加随机偏移，避免重叠
+            const offsetX = Phaser.Math.Between(-20, 20);
+            const spawnY = y - 30; // 从敌人上方生成，确保有下落过程
+            
+            const coin = new Coin(this, x + offsetX, spawnY);
+            
+            // 设置随机初速度，向外扩散
+            const vx = Phaser.Math.Between(
+                GameConfig.DROP_INITIAL_VX[0], 
+                GameConfig.DROP_INITIAL_VX[1]
+            ) * (i % 2 === 0 ? 1 : -1); // 交替向左右飞
+            const vy = Phaser.Math.Between(
+                GameConfig.DROP_INITIAL_VY[0],
+                GameConfig.DROP_INITIAL_VY[1]
+            );
+            
+            coin.body.setVelocity(vx, vy);
+            this.coinsGroup.add(coin);
+        }
+    }
+    
+    spawnHearts(x, y, count) {
+        // 生成多个心心，带有物理抛物线效果
+        for (let i = 0; i < count; i++) {
+            // 为每个心心添加随机偏移，避免重叠
+            const offsetX = Phaser.Math.Between(-20, 20);
+            const spawnY = y - 30; // 从敌人上方生成，确保有下落过程
+            
+            const heart = new Heart(this, x + offsetX, spawnY);
+            
+            // 设置随机初速度，向外扩散
+            const vx = Phaser.Math.Between(
+                GameConfig.DROP_INITIAL_VX[0],
+                GameConfig.DROP_INITIAL_VX[1]
+            ) * (i % 2 === 0 ? 1 : -1); // 交替向左右飞
+            const vy = Phaser.Math.Between(
+                GameConfig.DROP_INITIAL_VY[0],
+                GameConfig.DROP_INITIAL_VY[1]
+            );
+            
+            heart.body.setVelocity(vx, vy);
+            this.heartsGroup.add(heart);
+        }
     }
     
     triggerBoss() {

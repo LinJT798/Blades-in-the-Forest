@@ -74,15 +74,15 @@ const GameConfig = {
     // 掉落物
     DROP_RATES: {
         SLIME: {
-            COIN: { min: 1, max: 3, rate: 1.0 },
-            HEART: { min: 0, max: 1, rate: 0.2 }
+            COIN: { min: 2, max: 3, rate: 1.0 },
+            HEART: { min: 0, max: 1, rate: 0.5 }
         },
         SKELETON: {
             COIN: { min: 2, max: 5, rate: 1.0 },
-            HEART: { min: 0, max: 1, rate: 0.3 }
+            HEART: { min: 0, max: 1, rate: 0.7 }
         },
         DEATH_BOSS: {
-            COIN: { min: 10, max: 15, rate: 1.0 },
+            COIN: { min: 15, max: 20, rate: 1.0 },
             HEART: { min: 2, max: 3, rate: 1.0 }
         }
     },

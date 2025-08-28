@@ -150,7 +150,33 @@ class CombatSystem {
         
         // 检查死亡
         if (target.currentHP <= 0) {
-            this.onTargetKilled(target, source);
+            // 如果目标有die方法，调用它（让Enemy自己处理死亡和掉落）
+            if (target.die && typeof target.die === 'function') {
+                target.die();
+                
+                // 触发击杀事件
+                if (source === 'player' && target.name !== 'player') {
+                    if (window.gameData) {
+                        window.gameData.enemiesKilled++;
+                    }
+                    
+                    this.scene.events.emit('enemyKilled', {
+                        enemy: target,
+                        x: target.x,
+                        y: target.y
+                    });
+                    
+                    if (target.name === 'death') {
+                        if (window.gameData) {
+                            window.gameData.bossDefeated = true;
+                        }
+                        this.scene.events.emit('bossDefeated');
+                    }
+                }
+            } else {
+                // 其他情况（如玩家）使用原有逻辑
+                this.onTargetKilled(target, source);
+            }
         } else {
             // 触发受击效果
             this.onTargetHit(target);
