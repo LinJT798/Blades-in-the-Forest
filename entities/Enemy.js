@@ -117,6 +117,11 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.patrolDirection = -1;
         }
         
+        // 检查前方是否有地面（防止跳下平台）
+        if (this.checkPlatformEdge()) {
+            this.patrolDirection *= -1; // 转向
+        }
+        
         // 设置速度
         this.body.setVelocityX(this.moveSpeed * this.patrolDirection);
     }
@@ -127,6 +132,13 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         
         const direction = combatSystem.getPlayerDirection(this);
         const chaseSpeed = this.config.CHASE_SPEED || this.moveSpeed;
+        
+        // 检查前方是否有地面（防止跳下平台）
+        if (this.checkPlatformEdge()) {
+            // 如果前方没有地面，停止追击
+            this.body.setVelocityX(0);
+            return;
+        }
         
         this.body.setVelocityX(direction * chaseSpeed);
     }
@@ -286,6 +298,26 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.facingRight = false;
             this.setFlipX(true);
         }
+    }
+    
+    checkPlatformEdge() {
+        // 检查前方是否有地面，防止敌人跳下平台
+        const tileLayer = this.scene.mapLoader?.getTileLayer();
+        if (!tileLayer) return false;
+        
+        // 根据移动方向确定检测位置
+        const checkDirection = this.body.velocity.x > 0 ? 1 : -1;
+        const checkDistance = 20; // 前方检测距离
+        
+        // 检测点：敌人前方下方位置
+        const checkX = this.x + (checkDirection * checkDistance);
+        const checkY = this.body.bottom + 10; // 脚下稍微往下一点
+        
+        // 获取检测点的瓦片
+        const tile = tileLayer.getTileAtWorldXY(checkX, checkY);
+        
+        // 如果前方下方没有实体瓦片，说明是平台边缘
+        return !tile || !tile.collides;
     }
     
     isInView() {

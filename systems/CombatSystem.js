@@ -302,10 +302,19 @@ class CombatSystem {
     getPlayerDistance(enemy) {
         if (!this.player) return Infinity;
         
-        return Phaser.Math.Distance.Between(
-            enemy.x, enemy.y,
-            this.player.x, this.player.y
-        );
+        // 计算水平距离
+        const horizontalDistance = Math.abs(enemy.x - this.player.x);
+        
+        // 计算垂直距离
+        const verticalDistance = Math.abs(enemy.y - this.player.y);
+        
+        // 如果垂直距离过大（不同平台），返回无限远
+        if (verticalDistance > 100) {
+            return Infinity;
+        }
+        
+        // 主要考虑水平距离，垂直距离只作为辅助判断
+        return horizontalDistance;
     }
     
     getPlayerDirection(enemy) {
