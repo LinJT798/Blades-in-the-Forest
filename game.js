@@ -23,7 +23,25 @@ class Game {
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
                 width: GameConfig.GAME_WIDTH,
-                height: GameConfig.GAME_HEIGHT
+                height: GameConfig.GAME_HEIGHT,
+                // 添加整数缩放以保持像素完美
+                pixelArt: true,
+                autoRound: true,
+                min: {
+                    width: GameConfig.GAME_WIDTH,
+                    height: GameConfig.GAME_HEIGHT
+                },
+                max: {
+                    width: GameConfig.GAME_WIDTH * 4,
+                    height: GameConfig.GAME_HEIGHT * 4
+                },
+                // 使用最近邻插值
+                antialias: false
+            },
+            render: {
+                pixelArt: true,
+                antialias: false,
+                antialiasGL: false
             },
             scene: [PreloadScene, MenuScene, GameScene, GameOverScene]
         };

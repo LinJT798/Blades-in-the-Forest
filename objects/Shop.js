@@ -222,8 +222,8 @@ class Shop extends Phaser.Physics.Arcade.Sprite {
             
             // 直接使用卡片图片作为主体
             const cardImage = this.scene.add.image(0, 0, card.image);
-            // 使用1/3缩放，从360x480缩到120x160左右
-            cardImage.setScale(1/3);
+            // 使用0.4等比缩放，从320x400缩到128x160
+            cardImage.setScale(0.4);
             
             // 卡片价格（金币icon + 数字，放在卡片下方）
             const priceContainer = this.scene.add.container(0, 90);
@@ -279,8 +279,8 @@ class Shop extends Phaser.Physics.Arcade.Sprite {
         
         // 直接使用重随按钮图片
         const buttonBg = this.scene.add.image(0, 0, 'reroll_button');
-        // 使用1/3缩放，从300x144缩到100x48左右
-        buttonBg.setScale(1/3);
+        // 使用0.3等比缩放，从320x160缩到96x48
+        buttonBg.setScale(0.3);
         
         buttonContainer.add(buttonBg);
         
