@@ -1,5 +1,6 @@
 class Shop extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
+        // Y坐标已经是底部位置，需要调整为中心位置
         super(scene, x, y, 'shop');
         
         this.scene = scene;
@@ -17,9 +18,12 @@ class Shop extends Phaser.Physics.Arcade.Sprite {
         const scaleY = targetHeight / this.height;
         this.setScale(scaleX, scaleY);
         
+        // 设置原点为底部中心（与MapLoader的坐标系统一致）
+        this.setOrigin(0.5, 1);
+        
         // 设置碰撞盒（仅底部）
         this.body.setSize(targetWidth * 0.8, 20);
-        this.body.setOffset(targetWidth * 0.1, targetHeight - 20);
+        this.body.setOffset(-targetWidth * 0.4, -20);
         
         // 交互提示
         this.interactionHint = null;

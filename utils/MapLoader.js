@@ -4,9 +4,24 @@ class MapLoader {
         this.map = null;
         this.tileset = null;
         this.layers = {};
-        this.objectGroups = {};
         this.parallaxLayers = [];
         this.decorations = [];
+        
+        // 初始化对象组结构
+        this.objectGroups = {
+            spawnPoint: null,
+            enemies: {
+                slimes: [],
+                skeletons: [],
+                boss: null
+            },
+            chests: {
+                small: [],
+                large: []
+            },
+            shops: [],
+            tutorials: []
+        };
     }
     
     loadMap() {
@@ -110,6 +125,16 @@ class MapLoader {
     }
     
     createDecoration(decorationId, x, y) {
+        // 如果是商店（ID 326），记录位置供后续创建交互对象
+        if (decorationId === 326) {
+            // 商店位置：瓦片底部中心
+            const shopX = x + GameConfig.TILE_SIZE / 2;
+            const shopY = y + GameConfig.TILE_SIZE;
+            this.objectGroups.shops.push({ x: shopX, y: shopY });
+            // 不创建装饰精灵，因为会创建Shop对象
+            return;
+        }
+        
         // 获取装饰物配置
         const decorationConfig = this.getDecorationConfig(decorationId);
         
@@ -137,8 +162,8 @@ class MapLoader {
             // 设置深度
             sprite.setDepth(2);
             
-            // 如果是商店，添加动画
-            if (decorationId === 325 || decorationId === 326) {
+            // 如果是商店动画，添加动画
+            if (decorationId === 325) {
                 if (this.scene.anims.exists('shop_idle')) {
                     sprite.play('shop_idle');
                 }
@@ -172,20 +197,14 @@ class MapLoader {
         const objectLayer = this.map.getObjectLayer('对象层');
         
         if (objectLayer) {
-            this.objectGroups = {
-                spawnPoint: null,
-                enemies: {
-                    slimes: [],
-                    skeletons: [],
-                    boss: null
-                },
-                chests: {
-                    small: [],
-                    large: []
-                },
-                shops: [],
-                tutorials: []
-            };
+            // 清空已有数据（除了shops，因为shops可能从装饰层添加）
+            this.objectGroups.spawnPoint = null;
+            this.objectGroups.enemies.slimes = [];
+            this.objectGroups.enemies.skeletons = [];
+            this.objectGroups.enemies.boss = null;
+            this.objectGroups.chests.small = [];
+            this.objectGroups.chests.large = [];
+            this.objectGroups.tutorials = [];
             
             // 遍历所有对象
             objectLayer.objects.forEach(obj => {
@@ -228,10 +247,11 @@ class MapLoader {
                         this.objectGroups.chests.large.push({ x: obj.x, y: correctedY });
                         break;
                         
-                    case '商店':
-                    case 'shop':
-                        this.objectGroups.shops.push({ x: obj.x, y: correctedY });
-                        break;
+                    // 商店现在从装饰层读取，不再从对象层读取
+                    // case '商店':
+                    // case 'shop':
+                    //     this.objectGroups.shops.push({ x: obj.x, y: correctedY });
+                    //     break;
                         
                     case '教学':
                     case 'tutorial':
