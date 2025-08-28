@@ -139,7 +139,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     handleInput(delta) {
-        // 如果被眩晕或正在防御，限制移动
+        // 如果被眩晕，限制移动
         if (this.states.isStunned) {
             this.body.setVelocityX(0);
             return;
@@ -148,6 +148,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 防御状态
         if (this.keys.defense.isDown && this.currentSP > 0) {
             this.defend();
+            // 防御状态下被击中时保持击退速度
+            if (this.states.isInvincible) {
+                return;
+            }
+            // 防御状态下限制移动
+            this.body.setVelocityX(this.body.velocity.x * 0.9); // 逐渐减速
             return;
         } else {
             this.states.isDefending = false;
@@ -203,16 +209,16 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
-        // 受击状态 - 只在刚受击时播放，不阻止后续动画更新
-        if (this.states.isStunned && !this.animationManager.isAnimationPlaying(this, 'be_attacked')) {
-            this.animationManager.playAnimation(this, 'be_attacked');
-            // 不要return，让后续动画可以替换
-        }
-        
-        // 防御状态
+        // 防御状态（优先级高于受击）
         if (this.states.isDefending) {
             this.animationManager.playAnimation(this, 'shield_defense', true);
             return;
+        }
+        
+        // 受击状态 - 只在非防御状态下播放受击动画
+        if (this.states.isStunned && !this.animationManager.isAnimationPlaying(this, 'be_attacked')) {
+            this.animationManager.playAnimation(this, 'be_attacked');
+            // 不要return，让后续动画可以替换
         }
         
         // 攻击动画
@@ -330,7 +336,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     defend() {
         if (this.currentSP > 0 && !this.states.isAttacking) {
             this.states.isDefending = true;
-            this.body.setVelocityX(this.body.velocity.x * 0.5); // 减速
+            // 只在不是被击中状态时减速
+            if (!this.states.isInvincible) {
+                this.body.setVelocityX(this.body.velocity.x * 0.5); // 减速
+            }
         }
     }
     
@@ -373,7 +382,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 计算实际伤害
         let actualDamage = damage;
-        if (this.states.isDefending) {
+        const isDefending = this.states.isDefending;
+        if (isDefending) {
             actualDamage = Math.floor(damage * GameConfig.DEFENSE_REDUCTION);
         }
         
@@ -391,8 +401,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
-        // 受击效果
-        this.onHit();
+        // 受击效果（防御状态特殊处理）
+        if (isDefending) {
+            this.onDefendHit();
+        } else {
+            this.onHit();
+        }
     }
     
     onHit() {
@@ -429,6 +443,28 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.time.delayedCall(GameConfig.HIT_STUN_TIME, () => {
             this.states.isStunned = false;
         });
+    }
+    
+    onDefendHit() {
+        // 防御状态下被击中，保持防御动画，只有击退和闪烁
+        
+        // 轻微击退（防御时击退更小）
+        const knockbackDirection = this.states.facingRight ? -1 : 1;
+        this.body.setVelocityX(knockbackDirection * GameConfig.KNOCKBACK_DISTANCE * 0.3);
+        
+        // 闪烁效果（防御成功的蓝色闪烁，更明显）
+        this.setTint(0x4444ff);
+        this.scene.time.delayedCall(150, () => {
+            this.clearTint();
+        });
+        
+        // 短暂无敌时间
+        this.states.isInvincible = true;
+        this.scene.time.delayedCall(500, () => {
+            this.states.isInvincible = false;
+        });
+        
+        // 防御状态不设置硬直，玩家可以继续防御
     }
     
     heal(amount) {

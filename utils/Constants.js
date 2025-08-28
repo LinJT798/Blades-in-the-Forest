@@ -27,13 +27,13 @@ const GameConfig = {
     // 精力消耗
     SP_COST_RUN: 10, // per second
     SP_COST_JUMP: 5,  // 降低跳跃消耗
-    SP_COST_ATTACK: 10,
+    SP_COST_ATTACK: 7,
     SP_COST_COMBO: 15,
-    SP_COST_DEFENSE: 5, // per second
+    SP_COST_DEFENSE: 10, // per second
     
     // 精力恢复
-    SP_RECOVER_IDLE: 5, // per second
-    SP_RECOVER_WALK: 3, // per second
+    SP_RECOVER_IDLE: 10, // per second
+    SP_RECOVER_WALK: 6, // per second
     
     // 敌人属性
     SLIME: {
