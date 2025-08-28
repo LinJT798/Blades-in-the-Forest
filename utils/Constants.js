@@ -49,13 +49,13 @@ const GameConfig = {
     },
     
     SKELETON: {
-        HP: 40,
+        HP: 30,
         ATTACK: 8,
         PATROL_SPEED: 40,
-        CHASE_SPEED: 80,
+        CHASE_SPEED: 60,
         DETECT_RADIUS: 120,
         ATTACK_RADIUS: 50,
-        ATTACK_INTERVAL: 1200,
+        ATTACK_INTERVAL: 2000,
         PATROL_RANGE: 100,
         SCALE: 0.6,
         FRAME_RATE: 10

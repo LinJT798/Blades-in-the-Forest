@@ -7,6 +7,7 @@ class Game {
             width: GameConfig.GAME_WIDTH,
             height: GameConfig.GAME_HEIGHT,
             pixelArt: true,
+            roundPixels: true,  // 开启像素对齐
             fps: {
                 target: 60,    // 目标帧率60fps
                 forceSetTimeOut: false  // 使用requestAnimationFrame而不是setTimeout
@@ -15,7 +16,7 @@ class Game {
                 default: 'arcade',
                 arcade: {
                     gravity: { y: GameConfig.GRAVITY },
-                    debug: false  // 开启debug模式查看碰撞体
+                    debug: true  // 开启debug模式查看碰撞体
                 }
             },
             scale: {
@@ -38,11 +39,17 @@ class Game {
             startTime: 0,
             chestsOpened: [],
             enemiesKilled: 0,
-            bossDefeated: false
+            bossDefeated: false,
+            buffs: {} // 初始化buff存储
         };
         
         // 将游戏数据挂载到全局
         window.gameData = this.gameData;
+        
+        // 确保CardSystem初始化（如果还没有的话）
+        if (!window.cardSystem && typeof CardSystem !== 'undefined') {
+            window.cardSystem = new CardSystem();
+        }
     }
     
     resetGameData() {
@@ -54,6 +61,12 @@ class Game {
         this.gameData.chestsOpened = [];
         this.gameData.enemiesKilled = 0;
         this.gameData.bossDefeated = false;
+        this.gameData.buffs = {}; // 重置buff
+        
+        // 重置卡片商店
+        if (window.cardSystem) {
+            window.cardSystem.resetAllShops();
+        }
     }
 }
 

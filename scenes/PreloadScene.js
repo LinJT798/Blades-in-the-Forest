@@ -105,6 +105,14 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('coin_icon', 'Asset/animation/金币图标/coin000.png');
         this.load.image('heart_icon', 'Asset/animation/心心图标/heart_pic000.png');
         
+        // 加载卡片图片
+        this.load.image('card_heal', 'Asset/image/heal.png');
+        this.load.image('card_defense', 'Asset/image/defense.png');
+        this.load.image('card_energy', 'Asset/image/energy.png');
+        this.load.image('card_lifesteal', 'Asset/image/lifesteal.png');
+        this.load.image('card_regen', 'Asset/image/regen.png');
+        this.load.image('reroll_button', 'Asset/image/reroll.png');
+        
         // 加载动画配置文件
         this.loadAnimationConfigs();
     }

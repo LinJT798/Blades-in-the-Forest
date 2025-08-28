@@ -355,7 +355,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             y: hitboxY,
             width: 60,
             height: 40,
-            damage: this.attackPower
+            damage: this.attackPower,
+            lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
         });
     }
     
@@ -371,7 +372,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             y: hitboxY,
             width: 70,
             height: 45,
-            damage: this.comboAttackPower
+            damage: this.comboAttackPower,
+            lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
         });
     }
     
@@ -384,7 +386,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         let actualDamage = damage;
         const isDefending = this.states.isDefending;
         if (isDefending) {
-            actualDamage = Math.floor(damage * GameConfig.DEFENSE_REDUCTION);
+            // 应用防御减伤（包括卡片buff）
+            let defenseReduction = GameConfig.DEFENSE_REDUCTION;
+            if (window.gameData.buffs && window.gameData.buffs.defenseBonus) {
+                defenseReduction -= window.gameData.buffs.defenseBonus; // 减伤提高
+            }
+            actualDamage = Math.floor(damage * Math.max(0.1, defenseReduction));
         }
         
         // 扣血
@@ -532,10 +539,31 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             callback: () => {
                 if (!this.states.isRunning && !this.states.isDefending && !this.states.isAttacking) {
                     const speed = Math.abs(this.body.velocity.x);
-                    const recoveryRate = speed > 10 ? 
+                    let recoveryRate = speed > 10 ? 
                         GameConfig.SP_RECOVER_WALK : GameConfig.SP_RECOVER_IDLE;
                     
+                    // 应用精力回复buff
+                    if (window.gameData.buffs && window.gameData.buffs.energyRegenBonus) {
+                        recoveryRate *= (1 + window.gameData.buffs.energyRegenBonus);
+                    }
+                    
                     this.recoverSP(recoveryRate / 10); // 除以10因为每100ms执行一次
+                }
+                
+                // 静止回血buff
+                if (window.gameData.buffs && window.gameData.buffs.idleRegen) {
+                    const speed = Math.abs(this.body.velocity.x);
+                    const isIdle = speed <= 10 && !this.states.isAttacking && !this.states.isDefending;
+                    
+                    if (isIdle && this.currentHP < this.maxHP) {
+                        const regenAmount = window.gameData.buffs.idleRegen / 10; // 每100ms的回复量
+                        this.currentHP = Math.min(this.maxHP, this.currentHP + regenAmount);
+                        
+                        // 更新全局数据
+                        if (window.gameData) {
+                            window.gameData.playerHP = this.currentHP;
+                        }
+                    }
                 }
             },
             loop: true

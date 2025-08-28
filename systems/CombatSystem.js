@@ -30,8 +30,25 @@ class CombatSystem {
         // 检测与敌人的碰撞
         this.enemies.forEach(enemy => {
             if (!enemy.isDead && this.checkCollision(hitbox, enemy)) {
+                // 记录敌人当前血量（用于计算实际造成的伤害）
+                const enemyHPBefore = enemy.currentHP;
+                
                 // 造成伤害
                 this.dealDamage(enemy, attackData.damage, 'player');
+                
+                // 计算实际造成的伤害
+                const actualDamage = enemyHPBefore - (enemy.currentHP || 0);
+                
+                // 应用生命偷取效果
+                if (attackData.lifesteal && attackData.lifesteal > 0 && actualDamage > 0) {
+                    const healAmount = Math.floor(actualDamage * attackData.lifesteal);
+                    if (healAmount > 0 && this.player) {
+                        this.player.heal(healAmount);
+                        
+                        // 显示吸血效果（绿色数字）
+                        this.showDamageNumber(this.player.x, this.player.y - 30, `+${healAmount}`, '#00ff00');
+                    }
+                }
                 
                 // 击退效果
                 this.applyKnockback(enemy, attackData.x < enemy.x ? 1 : -1);

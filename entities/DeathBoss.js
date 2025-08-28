@@ -5,8 +5,8 @@ class DeathBoss extends Enemy {
         this.name = 'death';
         
         // 设置碰撞盒
-        this.body.setSize(60, 70);
-        this.body.setOffset(10, 5);
+        this.body.setSize(60, 55);
+        this.body.setOffset(10, 10);
         
         // BOSS特有属性
         this.phase = 1; // 当前阶段

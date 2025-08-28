@@ -5,8 +5,8 @@ class Skeleton extends Enemy {
         this.name = 'skeleton';
         
         // 设置碰撞盒
-        this.body.setSize(50, 55);
-        this.body.setOffset(15, 5);
+        this.body.setSize(50, 33);
+        this.body.setOffset(15, 11);
         
         // 初始动画
         this.animationManager.playAnimation(this, 'idle', true);
