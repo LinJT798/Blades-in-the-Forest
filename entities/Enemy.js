@@ -218,16 +218,27 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.isInvincible = false;
         });
         
-        // 轻微击退
-        const knockback = this.facingRight ? -10 : 10;
-        this.body.setVelocityX(knockback);
+        // 轻微击退（检查body是否存在）
+        if (this.body) {
+            const knockback = this.facingRight ? -10 : 10;
+            this.body.setVelocityX(knockback);
+        }
     }
     
     die() {
+        // 检查是否已经死亡，避免重复调用
+        if (this.isDead) {
+            return;
+        }
+        
         this.isDead = true;
         this.isAttacking = false;
-        this.body.setVelocity(0, 0);
-        this.body.enable = false;
+        
+        // 检查 body 是否存在再操作
+        if (this.body) {
+            this.body.setVelocity(0, 0);
+            this.body.enable = false;
+        }
         
         // 播放死亡动画
         this.animationManager.playAnimation(this, 'death');

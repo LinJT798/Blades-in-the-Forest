@@ -58,6 +58,9 @@ class GameScene extends Phaser.Scene {
         // 显示初始教程
         this.showInitialTutorial();
         
+        // 设置debug快捷键
+        this.setupDebugControls();
+        
         // 记录开始时间
         if (window.gameData) {
             window.gameData.startTime = Date.now();
@@ -119,7 +122,8 @@ class GameScene extends Phaser.Scene {
         
         // 创建BOSS（初始隐藏）
         if (enemySpawns.boss) {
-            this.boss = new DeathBoss(this, enemySpawns.boss.x, enemySpawns.boss.y);
+            // Y轴上移50像素，避免卡在地面里
+            this.boss = new DeathBoss(this, enemySpawns.boss.x, enemySpawns.boss.y - 50);
             this.enemies.push(this.boss);
         }
         
@@ -305,6 +309,106 @@ class GameScene extends Phaser.Scene {
                 });
             });
         }
+    }
+    
+    setupDebugControls() {
+        // Debug模式 - 启用快捷传送
+        const DEBUG_MODE = true;  // 设置为false可以关闭debug功能
+        
+        if (!DEBUG_MODE) return;
+        
+        // 显示debug提示
+        console.log('Debug模式已启用：按数字键1-9传送到对应存档点');
+        
+        // 为每个数字键设置传送功能
+        for (let i = 1; i <= 9; i++) {
+            const key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[`ONE`.replace('ONE', 
+                ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'][i-1])]);
+            
+            key.on('down', () => {
+                this.debugTeleportToSavePoint(i);
+            });
+        }
+        
+        // 按0键传送到起始点
+        const key0 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
+        key0.on('down', () => {
+            this.debugTeleportToSpawn();
+        });
+        
+        // 按T键触发Boss战
+        const keyT = this.input.keyboard.addKey('T');
+        keyT.on('down', () => {
+            this.debugTriggerBoss();
+        });
+        
+        // 按G键给玩家满血满精力
+        const keyG = this.input.keyboard.addKey('G');
+        keyG.on('down', () => {
+            this.debugFullRestore();
+        });
+        
+        // 按C键增加100金币
+        const keyC = this.input.keyboard.addKey('C');
+        keyC.on('down', () => {
+            this.debugAddCoins();
+        });
+    }
+    
+    debugTeleportToSavePoint(index) {
+        if (!this.savePoints || this.savePoints.length === 0) {
+            this.uiManager.showGameMessage('没有找到存档点', 1500);
+            return;
+        }
+        
+        // 获取第index个存档点（索引从0开始）
+        const savePoint = this.savePoints[index - 1];
+        if (!savePoint) {
+            this.uiManager.showGameMessage(`存档点${index}不存在`, 1500);
+            return;
+        }
+        
+        // 传送玩家
+        this.player.x = savePoint.x;
+        this.player.y = savePoint.y - 30;  // 稍微上移避免卡地面
+        
+        // 重置速度
+        this.player.body.setVelocity(0, 0);
+        
+        // 显示提示
+        this.uiManager.showGameMessage(`已传送到存档点${index}`, 1500);
+        console.log(`Debug: 传送到存档点${index} (${savePoint.x}, ${savePoint.y})`);
+    }
+    
+    debugTeleportToSpawn() {
+        const spawnPoint = this.mapLoader.getSpawnPoint();
+        this.player.x = spawnPoint.x;
+        this.player.y = spawnPoint.y - 20;
+        this.player.body.setVelocity(0, 0);
+        
+        this.uiManager.showGameMessage('已传送到起始点', 1500);
+        console.log(`Debug: 传送到起始点 (${spawnPoint.x}, ${spawnPoint.y})`);
+    }
+    
+    debugTriggerBoss() {
+        if (this.boss) {
+            this.triggerBoss();
+            this.uiManager.showGameMessage('Debug: 触发Boss战', 1500);
+        }
+    }
+    
+    debugFullRestore() {
+        this.player.currentHP = this.player.maxHP;
+        this.player.currentSP = this.player.maxSP;
+        
+        this.uiManager.updateHealthBar(this.player.currentHP, this.player.maxHP);
+        this.uiManager.showGameMessage('Debug: 满血满精力', 1500);
+    }
+    
+    debugAddCoins() {
+        window.gameData.coins += 100;
+        this.uiManager.updateCoinDisplay(window.gameData.coins);
+        this.uiManager.showGameMessage('Debug: +100金币', 1500);
     }
     
     showTutorial(properties) {

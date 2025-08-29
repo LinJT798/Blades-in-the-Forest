@@ -5,8 +5,8 @@ class DeathBoss extends Enemy {
         this.name = 'death';
         
         // 设置碰撞盒
-        this.body.setSize(60, 55);
-        this.body.setOffset(10, 10);
+        this.body.setSize(30, 20);
+        this.body.setOffset(25, 50);
         
         // BOSS特有属性
         this.phase = 1; // 当前阶段
@@ -39,8 +39,11 @@ class DeathBoss extends Enemy {
             duration: 1000,
             ease: 'Power2',
             onComplete: () => {
-                // 开始战斗
-                this.startBattle();
+                // 检查是否还在活动状态
+                if (this.active && this.scene) {
+                    // 开始战斗
+                    this.startBattle();
+                }
             }
         });
         
@@ -56,8 +59,11 @@ class DeathBoss extends Enemy {
     }
     
     startBattle() {
-        // 触发BOSS战事件
-        this.scene.events.emit('bossStarted');
+        // 检查scene是否存在
+        if (this.scene && this.scene.events) {
+            // 触发BOSS战事件
+            this.scene.events.emit('bossStarted');
+        }
     }
     
     updateAI(time, delta) {
@@ -108,6 +114,9 @@ class DeathBoss extends Enemy {
     }
     
     onPhaseChange() {
+        // 检查scene是否存在
+        if (!this.scene) return;
+        
         // 阶段变化特效
         this.scene.tweens.add({
             targets: this,
@@ -115,12 +124,16 @@ class DeathBoss extends Enemy {
             duration: 500,
             yoyo: true,
             onComplete: () => {
-                this.clearTint();
+                if (this.active) {
+                    this.clearTint();
+                }
             }
         });
         
         // 触发阶段变化事件
-        this.scene.events.emit('bossPhaseChange', this.phase);
+        if (this.scene.events) {
+            this.scene.events.emit('bossPhaseChange', this.phase);
+        }
     }
     
     getAttackFrame() {
@@ -168,9 +181,14 @@ class DeathBoss extends Enemy {
             duration: 2000,
             ease: 'Power2',
             onComplete: () => {
-                // 触发胜利事件
-                this.scene.events.emit('bossDefeated');
-                this.destroy();
+                // 检查scene是否还存在
+                if (this.scene && this.scene.events) {
+                    // 触发胜利事件
+                    this.scene.events.emit('bossDefeated');
+                }
+                if (this.active) {
+                    this.destroy();
+                }
             }
         });
         

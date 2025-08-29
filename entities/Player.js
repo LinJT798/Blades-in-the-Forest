@@ -345,7 +345,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     triggerAttackHitbox() {
         // 创建攻击判定区域
-        const attackRange = this.states.facingRight ? 60 : -60;
+        const attackRange = this.states.facingRight ? 30 : -30;  // 减少距离，让碰撞盒更贴近玩家
         const hitboxX = this.x + attackRange;
         const hitboxY = this.y;
         
@@ -353,7 +353,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.events.emit('playerAttack', {
             x: hitboxX,
             y: hitboxY,
-            width: 60,
+            width: 30,
             height: 40,
             damage: this.attackPower,
             lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
@@ -362,7 +362,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     triggerComboHitbox() {
         // 创建连击判定区域
-        const attackRange = this.states.facingRight ? 70 : -70;
+        const attackRange = this.states.facingRight ? 40 : -40;  // 减少距离，让碰撞盒更贴近玩家
         const hitboxX = this.x + attackRange;
         const hitboxY = this.y;
         
@@ -370,7 +370,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.events.emit('playerAttack', {
             x: hitboxX,
             y: hitboxY,
-            width: 70,
+            width: 40,  // 调整宽度，匹配新的攻击距离
             height: 45,
             damage: this.comboAttackPower,
             lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
