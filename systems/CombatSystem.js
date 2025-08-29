@@ -33,6 +33,11 @@ class CombatSystem {
                 // 记录敌人当前血量（用于计算实际造成的伤害）
                 const enemyHPBefore = enemy.currentHP;
                 
+                // 先应用击退效果（在造成伤害之前，这样不会被死亡中断）
+                // 击退方向：如果玩家在敌人左边，敌人向右击退，反之向左
+                const knockbackDirection = this.player.x < enemy.x ? 1 : -1;
+                this.applyKnockback(enemy, knockbackDirection);
+                
                 // 造成伤害
                 this.dealDamage(enemy, attackData.damage, 'player');
                 
@@ -49,9 +54,6 @@ class CombatSystem {
                         this.showDamageNumber(this.player.x, this.player.y - 30, `+${healAmount}`, '#00ff00');
                     }
                 }
-                
-                // 击退效果
-                this.applyKnockback(enemy, attackData.x < enemy.x ? 1 : -1);
             }
         });
         
@@ -137,8 +139,13 @@ class CombatSystem {
             actualDamage = Math.floor(damage * 0.3);
         }
         
-        // 扣血
-        target.currentHP = Math.max(0, target.currentHP - actualDamage);
+        // 如果目标有takeDamage方法，使用它（这样会触发onHit）
+        if (target.takeDamage && typeof target.takeDamage === 'function') {
+            target.takeDamage(actualDamage);
+        } else {
+            // 否则直接扣血
+            target.currentHP = Math.max(0, target.currentHP - actualDamage);
+        }
         
         // 显示伤害数字
         this.showDamageNumber(
@@ -148,8 +155,8 @@ class CombatSystem {
             source === 'player' ? 0xffff00 : 0xff0000
         );
         
-        // 检查死亡
-        if (target.currentHP <= 0) {
+        // 检查死亡（takeDamage内部会处理死亡，这里做二次检查）
+        if (target.currentHP <= 0 && !target.isDead) {
             // 如果目标有die方法，调用它（让Enemy自己处理死亡和掉落）
             if (target.die && typeof target.die === 'function') {
                 target.die();
@@ -254,13 +261,22 @@ class CombatSystem {
     applyKnockback(target, direction) {
         if (!target.body) return;
         
-        const knockbackForce = GameConfig.KNOCKBACK_DISTANCE * direction;
+        // 对敌人使用轻微的击退力度（类似玩家防御时的击退）
+        const isEnemy = target.name !== 'player';
+        const knockbackForce = isEnemy ? 
+            GameConfig.ENEMY_KNOCKBACK_FORCE * direction :
+            GameConfig.KNOCKBACK_DISTANCE * direction;
+        
+        // 设置水平击退速度
         target.body.setVelocityX(knockbackForce);
         
-        // 恢复速度
-        this.scene.time.delayedCall(200, () => {
-            if (target && target.body) {
-                target.body.setVelocityX(0);
+        // 不再添加向上的速度，保持击退简单
+        
+        // 快速恢复速度（让击退短促有力）
+        this.scene.time.delayedCall(150, () => {
+            if (target && target.body && !target.isDead) {
+                // 逐渐减速而不是突然停止
+                target.body.setVelocityX(target.body.velocity.x * 0.5);
             }
         });
     }

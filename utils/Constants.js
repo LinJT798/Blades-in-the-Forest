@@ -147,7 +147,8 @@ const GameConfig = {
     // 战斗相关
     HIT_STUN_TIME: 500,      // 受击硬直时间 ms
     INVINCIBLE_TIME: 1000,    // 无敌时间 ms
-    KNOCKBACK_DISTANCE: 30,   // 击退距离 px
+    KNOCKBACK_DISTANCE: 30,   // 玩家击退距离 px
+    ENEMY_KNOCKBACK_FORCE: 50,  // 敌人击退力度 px/s（轻微击退）
     
     // 掉落物理
     DROP_GRAVITY: 500,

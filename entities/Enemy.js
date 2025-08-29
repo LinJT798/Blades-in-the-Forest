@@ -73,6 +73,12 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     
     updateAI(time, delta) {
+        // 如果被眩晕，停止所有AI行为
+        if (this.isStunned) {
+            // 硬直期间不执行任何动作
+            return;
+        }
+        
         // 获取战斗系统
         const combatSystem = this.scene.combatSystem;
         if (!combatSystem) return;
@@ -206,6 +212,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     
     onHit() {
+        // 受击硬直
+        this.isStunned = true;
+        this.isAttacking = false;  // 中断攻击
+        
         // 受击闪烁
         this.setTint(0xff0000);
         this.scene.time.delayedCall(100, () => {
@@ -218,11 +228,12 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.isInvincible = false;
         });
         
-        // 轻微击退（检查body是否存在）
-        if (this.body) {
-            const knockback = this.facingRight ? -10 : 10;
-            this.body.setVelocityX(knockback);
-        }
+        // 硬直恢复时间（比无敌时间短，让敌人能更快恢复行动）
+        this.scene.time.delayedCall(200, () => {
+            this.isStunned = false;
+        });
+        
+        // 击退效果由CombatSystem统一处理
     }
     
     die() {
