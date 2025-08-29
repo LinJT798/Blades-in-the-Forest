@@ -5,8 +5,8 @@ class PhysicsSystem {
     }
     
     setupWorldPhysics() {
-        // 设置世界边界
-        this.scene.physics.world.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT);
+        // 设置世界边界（底部延伸500像素，允许掉落）
+        this.scene.physics.world.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT + 500);
         
         // 设置重力
         this.scene.physics.world.gravity.y = GameConfig.GRAVITY;

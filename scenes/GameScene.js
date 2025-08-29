@@ -542,12 +542,29 @@ class GameScene extends Phaser.Scene {
         // 更新玩家
         if (this.player) {
             this.player.update(time, delta);
+            
+            // 检查玩家是否掉落到地图底部（地图高度288 + 100 = 388）
+            if (this.player.y > GameConfig.MAP_HEIGHT + 100) {
+                console.log('Player fell off the map! Y:', this.player.y);
+                // 玩家掉出地图，触发死亡
+                if (!this.player.states.isDead) {
+                    this.player.takeDamage(this.player.currentHP);
+                }
+            }
         }
         
         // 更新敌人
         this.enemies.forEach(enemy => {
             if (enemy.active) {
                 enemy.update(time, delta);
+                
+                // 检查敌人是否掉落到地图底部
+                if (enemy.y > GameConfig.MAP_HEIGHT + 100) {
+                    // 敌人掉出地图，直接死亡
+                    if (!enemy.isDead) {
+                        enemy.die();
+                    }
+                }
             }
         });
         

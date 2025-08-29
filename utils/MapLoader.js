@@ -43,8 +43,8 @@ class MapLoader {
         // 解析对象层
         this.parseObjectLayer();
         
-        // 设置世界边界
-        this.scene.physics.world.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT);
+        // 设置世界边界（底部延伸500像素，允许掉落）
+        this.scene.physics.world.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT + 500);
         
         return this;
     }
