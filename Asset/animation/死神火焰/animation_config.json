@@ -1,0 +1,33 @@
+{
+  "sprite_info": {
+    "name": "death_fire",
+    "width": 16,
+    "height": 28,
+    "scale_ratio": 1.0
+  },
+  "layout": {
+    "columns": 3,
+    "rows": 1,
+    "padding": 2
+  },
+  "actions": {
+    "fire": {
+      "frames": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "frame_count": 3
+    }
+  },
+  "frame_rate": 10
+}

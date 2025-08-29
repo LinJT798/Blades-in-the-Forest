@@ -655,6 +655,15 @@ class GameScene extends Phaser.Scene {
         // 重置区域内的敌人
         this.resetEnemiesInRange(savePointData.position.x);
         
+        // 如果Boss已经触发，重置Boss状态
+        if (this.boss && this.boss.active) {
+            this.resetBoss();
+        }
+        
+        // 重置摄像机边界，恢复跟随玩家
+        this.cameras.main.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        
         // 更新UI
         this.uiManager.updateHealthBar(this.player.currentHP, this.player.maxHP);
         this.uiManager.updateCoinDisplay(window.gameData.coins);
@@ -821,6 +830,54 @@ class GameScene extends Phaser.Scene {
         // 延迟后进入结算场景
         this.time.delayedCall(3000, () => {
             this.scene.start('GameOverScene');
+        });
+    }
+    
+    resetBoss() {
+        if (!this.boss) return;
+        
+        // 隐藏Boss
+        this.boss.setVisible(false);
+        this.boss.setActive(false);
+        if (this.boss.body) {
+            this.boss.body.enable = false;
+        }
+        
+        // 重置Boss状态
+        this.boss.currentHP = this.boss.maxHP;
+        this.boss.isDead = false;
+        this.boss.isAttacking = false;
+        this.boss.isTeleporting = false;
+        this.boss.phase = 1;
+        this.boss.attackSpeedBonus = 0;
+        this.boss.lastAttackTime = Date.now();
+        this.boss.teleportCooldown = 0;
+        
+        // 清除Boss动画和效果
+        if (this.boss.anims) {
+            this.boss.anims.stop();
+        }
+        this.boss.clearTint();
+        this.boss.alpha = 1;
+        
+        // 关闭Debug显示
+        if (this.boss.debugGraphics) {
+            this.boss.debugGraphics.clear();
+        }
+        if (this.boss.debugText) {
+            this.boss.debugText.setVisible(false);
+        }
+        
+        // 重置Boss战状态
+        this.isBossBattle = false;
+        this.uiManager.hideBossHealthBar();
+        
+        // 重置Boss触发的宝箱（如果有的话）
+        // 找到Boss区域的大宝箱并重置（Boss区域在x > 3200的位置）
+        this.chests.forEach(chest => {
+            if (chest.type === 'large' && chest.x > 3200) {
+                chest.resetChest();
+            }
         });
     }
     

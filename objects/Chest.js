@@ -177,4 +177,24 @@ class Chest extends Phaser.Physics.Arcade.Sprite {
             this.scene.events.emit('triggerBoss');
         });
     }
+    
+    resetChest() {
+        // 重置宝箱状态
+        this.isOpened = false;
+        
+        // 恢复到第一帧（关闭状态）
+        this.setFrame(0);
+        
+        // 从已打开列表中移除
+        const chestId = `${this.type}_${this.x}_${this.y}`;
+        if (window.gameData && window.gameData.chestsOpened) {
+            const index = window.gameData.chestsOpened.indexOf(chestId);
+            if (index > -1) {
+                window.gameData.chestsOpened.splice(index, 1);
+            }
+        }
+        
+        // 确保交互提示已清除
+        this.hideInteractionHint();
+    }
 }

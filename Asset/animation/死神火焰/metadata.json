@@ -1,0 +1,53 @@
+{
+  "export_mode": "atlas",
+  "export_type": "\u56fe\u96c6\u5bfc\u51fa",
+  "atlas_name": "death_fire",
+  "atlas_file": "death_fire.png",
+  "image_format": "PNG",
+  "atlas_size": {
+    "width": 52,
+    "height": 28
+  },
+  "sprite_count": 3,
+  "sprite_padding": 2,
+  "layout_info": {
+    "estimated_columns": 2,
+    "estimated_rows": 0,
+    "total_frames": 3,
+    "average_sprite_width": 16,
+    "average_sprite_height": 28,
+    "min_sprite_width": 16,
+    "max_sprite_width": 16,
+    "min_sprite_height": 28,
+    "max_sprite_height": 28
+  },
+  "sprites": [
+    {
+      "name": "sprite_000",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "width": 16,
+        "height": 28
+      }
+    },
+    {
+      "name": "sprite_001",
+      "frame": {
+        "x": 18,
+        "y": 0,
+        "width": 16,
+        "height": 28
+      }
+    },
+    {
+      "name": "sprite_002",
+      "frame": {
+        "x": 36,
+        "y": 0,
+        "width": 16,
+        "height": 28
+      }
+    }
+  ]
+}
