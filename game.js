@@ -16,7 +16,7 @@ class Game {
                 default: 'arcade',
                 arcade: {
                     gravity: { y: GameConfig.GRAVITY },
-                    debug: false  // 开启debug模式查看碰撞体
+                    debug: true  // 开启debug模式查看碰撞体
                 }
             },
             scale: {
@@ -58,7 +58,9 @@ class Game {
             chestsOpened: [],
             enemiesKilled: 0,
             bossDefeated: false,
-            buffs: {} // 初始化buff存储
+            buffs: {}, // 初始化buff存储
+            savePoints: {}, // 存档点数据
+            currentSavePoint: null // 当前激活的存档点
         };
         
         // 将游戏数据挂载到全局
@@ -80,6 +82,8 @@ class Game {
         this.gameData.enemiesKilled = 0;
         this.gameData.bossDefeated = false;
         this.gameData.buffs = {}; // 重置buff
+        this.gameData.savePoints = {}; // 重置存档点
+        this.gameData.currentSavePoint = null; // 清除当前存档点
         
         // 重置卡片商店
         if (window.cardSystem) {

@@ -38,7 +38,7 @@ const GameConfig = {
     // 敌人属性
     SLIME: {
         HP: 20,
-        ATTACK: 5,
+        ATTACK: 10,
         PATROL_SPEED: 30,
         DETECT_RADIUS: 80,
         ATTACK_RADIUS: 40,
@@ -50,7 +50,7 @@ const GameConfig = {
     
     SKELETON: {
         HP: 30,
-        ATTACK: 8,
+        ATTACK: 15,
         PATROL_SPEED: 40,
         CHASE_SPEED: 60,
         DETECT_RADIUS: 120,
@@ -63,7 +63,7 @@ const GameConfig = {
     
     DEATH_BOSS: {
         HP: 100,
-        ATTACK: 15,
+        ATTACK: 20,
         MOVE_SPEED: 50,
         ATTACK_RADIUS: 60,
         ATTACK_INTERVAL: 2000,

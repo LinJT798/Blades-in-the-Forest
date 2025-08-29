@@ -694,19 +694,49 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     respawn(x, y) {
+        // 重置位置（稍微上移20像素，避免卡在地面里）
         this.x = x;
-        this.y = y;
+        this.y = y - 20;
+        
+        // 重置生命和精力
         this.currentHP = this.maxHP;
         this.currentSP = this.maxSP;
+        
+        // 重置所有状态标志
+        this.states.isGrounded = false;
+        this.states.isJumping = false;
+        this.states.isAttacking = false;
+        this.states.isDefending = false;
+        this.states.isRunning = false;
         this.states.isDead = false;
         this.states.isInvincible = false;
         this.states.isStunned = false;
+        this.states.facingRight = true;
+        this.states.canCombo = false;
+        this.states.isFlying = false;
+        this.states.isLanding = false;
+        this.states.isCrouching = false;
+        this.states.isWallSliding = false;
+        this.states.jumpReloadTime = 0;
+        
+        // 重新启用物理和输入
         this.body.enable = true;
+        this.body.setVelocity(0, 0);
+        
+        // 清除视觉效果
         this.clearTint();
         this.alpha = 1;
+        this.setScale(1, 1);
         
-        // 重置动画
-        this.animationManager.playAnimation(this, 'idle');
+        // 强制停止所有动画
+        this.anims.stop();
+        
+        // 立即播放idle动画，使用play方法确保动画开始
+        this.play('player_idle', true);
+        
+        // 确保可以移动
+        this.body.setAllowGravity(true);
+        this.body.setImmovable(false);
     }
     
     destroy() {

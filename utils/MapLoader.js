@@ -135,6 +135,19 @@ class MapLoader {
             return;
         }
         
+        // 如果是sign（ID 327），记录位置供后续创建存档点对象
+        if (decorationId === 327) {
+            // 存档点位置：瓦片底部中心
+            const savePointX = x + GameConfig.TILE_SIZE / 2;
+            const savePointY = y + GameConfig.TILE_SIZE;
+            if (!this.objectGroups.savePoints) {
+                this.objectGroups.savePoints = [];
+            }
+            this.objectGroups.savePoints.push({ x: savePointX, y: savePointY });
+            // 不创建装饰精灵，因为会创建SavePoint对象
+            return;
+        }
+        
         // 获取装饰物配置
         const decorationConfig = this.getDecorationConfig(decorationId);
         
@@ -287,6 +300,10 @@ class MapLoader {
     
     getShopPositions() {
         return this.objectGroups.shops;
+    }
+    
+    getSavePointPositions() {
+        return this.objectGroups.savePoints || [];
     }
     
     getTutorialZones() {

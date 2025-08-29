@@ -7,6 +7,7 @@ class GameScene extends Phaser.Scene {
         this.enemies = [];
         this.chests = [];
         this.shops = [];
+        this.savePoints = [];
         this.coins = [];
         this.hearts = [];
         this.boss = null;
@@ -86,8 +87,8 @@ class GameScene extends Phaser.Scene {
         // 获取出生点
         const spawnPoint = this.mapLoader.getSpawnPoint();
         
-        // 创建玩家
-        this.player = new Player(this, spawnPoint.x, spawnPoint.y);
+        // 创建玩家（Y轴上移20像素，避免初始位置过低）
+        this.player = new Player(this, spawnPoint.x, spawnPoint.y - 20);
         
         // 设置玩家碰撞
         this.physicsSystem.setupPlayerCollisions(
@@ -157,6 +158,15 @@ class GameScene extends Phaser.Scene {
             shopPositions.forEach(pos => {
                 const shop = new Shop(this, pos.x, pos.y);
                 this.shops.push(shop);
+            });
+        }
+        
+        // 创建存档点
+        const savePointPositions = this.mapLoader.getSavePointPositions();
+        if (savePointPositions) {
+            savePointPositions.forEach(pos => {
+                const savePoint = new SavePoint(this, pos.x, pos.y);
+                this.savePoints.push(savePoint);
             });
         }
         
@@ -342,36 +352,16 @@ class GameScene extends Phaser.Scene {
     }
     
     handleEnemyKilled(data) {
-        // 敌人30秒后重生（非BOSS）
-        if (data.enemy && data.enemy.name !== 'death') {
-            this.time.delayedCall(30000, () => {
-                if (!this.isGameOver && data.enemy && !data.enemy.scene) {
-                    // 如果敌人已经被销毁，重新创建
-                    const enemyType = data.enemy.name;
-                    const spawnPoint = data.enemy.spawnPoint;
-                    
-                    if (spawnPoint) {
-                        let newEnemy;
-                        if (enemyType === 'slime') {
-                            newEnemy = new Slime(this, spawnPoint.x, spawnPoint.y);
-                        } else if (enemyType === 'skeleton') {
-                            newEnemy = new Skeleton(this, spawnPoint.x, spawnPoint.y);
-                        }
-                        
-                        if (newEnemy) {
-                            this.enemies.push(newEnemy);
-                            this.physicsSystem.setupEnemyCollisions(
-                                [newEnemy],
-                                this.tileLayer,
-                                this.decorations
-                            );
-                        }
-                    }
-                } else if (data.enemy && data.enemy.scene) {
-                    // 如果敌人还存在，直接重生
-                    data.enemy.respawn();
-                }
-            });
+        // 移除定时复活功能，敌人死亡后不再重生
+        // 只记录击杀信息，用于存档复活时重置
+        if (data.enemy) {
+            // 记录原始出生点，用于存档复活时重置
+            if (!data.enemy.originalSpawnPoint) {
+                data.enemy.originalSpawnPoint = {
+                    x: data.x,
+                    y: data.y
+                };
+            }
         }
     }
     
@@ -379,6 +369,9 @@ class GameScene extends Phaser.Scene {
         if (this.isGameOver) return;
         
         this.isGameOver = true;
+        
+        // 暂停物理系统
+        this.physics.pause();
         
         // 显示死亡提示
         this.uiManager.showGameMessage('你死了！', 2000);
@@ -396,50 +389,107 @@ class GameScene extends Phaser.Scene {
         // 创建选项容器
         const optionsContainer = this.add.container(width / 2, height / 2);
         optionsContainer.setDepth(200);
+        optionsContainer.setScrollFactor(0);
         
-        // 背景
-        const bg = this.add.rectangle(0, 0, 300, 150, 0x000000, 0.8);
-        bg.setStrokeStyle(2, 0xffffff);
+        // 检查是否有存档点
+        const lastSavePoint = SavePoint.getLastSavePoint();
         
-        // 提示文字
-        const text = this.add.text(0, -40, '是否重新开始？', {
-            fontSize: '20px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
-        
-        // 重生按钮
-        const respawnBtn = this.createOptionButton(
-            -60, 20, '重生',
-            () => {
-                this.respawnPlayer();
-                optionsContainer.destroy();
-            }
-        );
-        
-        // 退出按钮
-        const exitBtn = this.createOptionButton(
-            60, 20, '退出',
-            () => {
-                this.scene.start('MenuScene');
-            }
-        );
-        
-        optionsContainer.add([bg, text, ...respawnBtn, ...exitBtn]);
+        if (lastSavePoint) {
+            // 有存档点，显示扩展选项
+            const bg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.8);
+            bg.setStrokeStyle(2, 0xffffff);
+            
+            const text = this.add.text(0, -60, '选择重生点', {
+                fontSize: '16px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            // 显示存档信息
+            const saveInfo = this.add.text(0, -30, 
+                `最近存档: HP ${lastSavePoint.playerData.hp}/${GameConfig.PLAYER_MAX_HP} | 金币 ${lastSavePoint.playerData.coins}`, {
+                fontSize: '12px',
+                color: '#88ff88'
+            }).setOrigin(0.5);
+            
+            // 从存档点重生按钮
+            const saveRespawnBtn = this.createOptionButton(
+                -120, 20, '从存档点重生',
+                () => {
+                    this.respawnFromSavePoint(lastSavePoint);
+                    optionsContainer.destroy();
+                }
+            );
+            
+            // 从起始点重生按钮
+            const startRespawnBtn = this.createOptionButton(
+                0, 20, '从起始点重生',
+                () => {
+                    this.respawnPlayer();
+                    optionsContainer.destroy();
+                }
+            );
+            
+            // 退出按钮
+            const exitBtn = this.createOptionButton(
+                120, 20, '退出',
+                () => {
+                    this.scene.start('MenuScene');
+                }
+            );
+            
+            optionsContainer.add([bg, text, saveInfo, ...saveRespawnBtn, ...startRespawnBtn, ...exitBtn]);
+        } else {
+            // 没有存档点，显示原始选项
+            const bg = this.add.rectangle(0, 0, 300, 150, 0x000000, 0.8);
+            bg.setStrokeStyle(2, 0xffffff);
+            
+            const text = this.add.text(0, -40, '是否重新开始？', {
+                fontSize: '16px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            // 重生按钮
+            const respawnBtn = this.createOptionButton(
+                -60, 20, '重生',
+                () => {
+                    this.respawnPlayer();
+                    optionsContainer.destroy();
+                }
+            );
+            
+            // 退出按钮
+            const exitBtn = this.createOptionButton(
+                60, 20, '退出',
+                () => {
+                    this.scene.start('MenuScene');
+                }
+            );
+            
+            optionsContainer.add([bg, text, ...respawnBtn, ...exitBtn]);
+        }
     }
     
     createOptionButton(x, y, text, callback) {
-        const btn = this.add.rectangle(x, y, 80, 30, 0x2c3e50);
+        const btn = this.add.rectangle(x, y, 100, 35, 0x2c3e50);
         btn.setInteractive({ useHandCursor: true });
-        btn.setStrokeStyle(1, 0xffffff);
+        btn.setStrokeStyle(2, 0xffffff);
+        btn.setScrollFactor(0); // 固定在屏幕上
         
         const btnText = this.add.text(x, y, text, {
             fontSize: '14px',
             color: '#ffffff'
         }).setOrigin(0.5);
+        btnText.setScrollFactor(0); // 固定在屏幕上
         
         btn.on('pointerdown', callback);
-        btn.on('pointerover', () => btn.setFillStyle(0x34495e));
-        btn.on('pointerout', () => btn.setFillStyle(0x2c3e50));
+        btn.on('pointerover', () => {
+            btn.setFillStyle(0x34495e);
+            btn.setScale(1.1);
+        });
+        btn.on('pointerout', () => {
+            btn.setFillStyle(0x2c3e50);
+            btn.setScale(1);
+        });
         
         return [btn, btnText];
     }
@@ -448,6 +498,127 @@ class GameScene extends Phaser.Scene {
         const spawnPoint = this.mapLoader.getSpawnPoint();
         this.player.respawn(spawnPoint.x, spawnPoint.y);
         this.isGameOver = false;
+        
+        // 恢复物理系统
+        this.physics.resume();
+    }
+    
+    respawnFromSavePoint(savePointData) {
+        // 重生到存档点位置（稍微上移一点，避免卡在地面）
+        this.player.respawn(savePointData.position.x, savePointData.position.y - 10);
+        
+        // 恢复存档时的状态
+        this.player.currentHP = savePointData.playerData.hp;
+        this.player.currentSP = savePointData.playerData.sp || GameConfig.PLAYER_MAX_SP;
+        window.gameData.coins = savePointData.playerData.coins;
+        
+        // 恢复buff状态（卡片效果）
+        if (savePointData.playerData.buffs) {
+            window.gameData.buffs = { ...savePointData.playerData.buffs };
+            
+            // 重新应用buff效果到玩家
+            this.applyBuffsToPlayer();
+        }
+        
+        // 重置区域内的敌人
+        this.resetEnemiesInRange(savePointData.position.x);
+        
+        // 更新UI
+        this.uiManager.updateHealthBar(this.player.currentHP, this.player.maxHP);
+        this.uiManager.updateCoinDisplay(window.gameData.coins);
+        // 注意：UIManager中没有updateEnergyBar方法，精力条会在update中自动更新
+        
+        // 显示提示
+        this.uiManager.showGameMessage('从存档点重生', 2000);
+        
+        this.isGameOver = false;
+        
+        // 恢复物理系统
+        this.physics.resume();
+    }
+    
+    resetEnemiesInRange(currentX) {
+        // 找到下一个存档点的位置
+        let nextSavePointX = GameConfig.MAP_WIDTH; // 默认为地图末尾
+        
+        // 获取所有存档点位置并排序
+        const savePointPositions = this.savePoints.map(sp => sp.x).sort((a, b) => a - b);
+        
+        // 找到当前位置之后的下一个存档点
+        for (let x of savePointPositions) {
+            if (x > currentX) {
+                nextSavePointX = x;
+                break;
+            }
+        }
+        
+        // 获取原始敌人出生点
+        const enemySpawns = this.mapLoader.getEnemySpawnPoints();
+        
+        // 清理当前区域内的所有敌人
+        this.enemies = this.enemies.filter(enemy => {
+            if (enemy.x >= currentX && enemy.x < nextSavePointX) {
+                // 销毁区域内的敌人
+                if (enemy.active) {
+                    enemy.destroy();
+                }
+                return false;
+            }
+            return true;
+        });
+        
+        // 重新创建区域内的敌人
+        if (enemySpawns.slimes) {
+            enemySpawns.slimes.forEach(spawn => {
+                if (spawn.x >= currentX && spawn.x < nextSavePointX) {
+                    const slime = new Slime(this, spawn.x, spawn.y);
+                    this.enemies.push(slime);
+                    this.physicsSystem.setupEnemyCollisions(
+                        [slime],
+                        this.tileLayer,
+                        this.decorations
+                    );
+                }
+            });
+        }
+        
+        if (enemySpawns.skeletons) {
+            enemySpawns.skeletons.forEach(spawn => {
+                if (spawn.x >= currentX && spawn.x < nextSavePointX) {
+                    const skeleton = new Skeleton(this, spawn.x, spawn.y);
+                    this.enemies.push(skeleton);
+                    this.physicsSystem.setupEnemyCollisions(
+                        [skeleton],
+                        this.tileLayer,
+                        this.decorations
+                    );
+                }
+            });
+        }
+        
+        console.log(`重置了区域内的敌人 (${currentX} - ${nextSavePointX})`);
+    }
+    
+    applyBuffsToPlayer() {
+        // 重新应用所有buff效果
+        if (window.gameData.buffs) {
+            // 防御提升
+            if (window.gameData.buffs.defense_up) {
+                // 防御buff会在玩家的takeDamage方法中自动生效
+                console.log('防御buff已恢复');
+            }
+            
+            // 吸血效果
+            if (window.gameData.buffs.lifesteal) {
+                // 吸血效果会在战斗系统中自动生效
+                console.log('吸血buff已恢复');
+            }
+            
+            // 自动回复（如果有的话，需要重新启动定时器）
+            if (window.gameData.buffs.idle_regen) {
+                console.log('自动回复buff已恢复');
+            }
+        }
     }
     
     spawnCoins(x, y, count) {
@@ -576,6 +747,11 @@ class GameScene extends Phaser.Scene {
         // 更新商店
         this.shops.forEach(shop => {
             shop.update();
+        });
+        
+        // 更新存档点
+        this.savePoints.forEach(savePoint => {
+            savePoint.update();
         });
         
         // 更新金币
