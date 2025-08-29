@@ -32,6 +32,11 @@ class PhysicsSystem {
     
     setupEnemyCollisions(enemies, tileLayer, decorations) {
         enemies.forEach(enemy => {
+            // 死神Boss不需要碰撞检测（可以飞行穿过地形）
+            if (enemy.name === 'death') {
+                return;
+            }
+            
             // 敌人与地块碰撞
             if (tileLayer) {
                 const tileCollider = this.scene.physics.add.collider(enemy, tileLayer);
@@ -48,9 +53,9 @@ class PhysicsSystem {
                 });
             }
             
-            // 敌人之间的碰撞
+            // 敌人之间的碰撞（死神也不和其他敌人碰撞）
             enemies.forEach(otherEnemy => {
-                if (enemy !== otherEnemy) {
+                if (enemy !== otherEnemy && otherEnemy.name !== 'death') {
                     const enemyCollider = this.scene.physics.add.collider(
                         enemy, 
                         otherEnemy,

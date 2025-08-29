@@ -318,7 +318,14 @@ class GameScene extends Phaser.Scene {
         if (!DEBUG_MODE) return;
         
         // 显示debug提示
-        console.log('Debug模式已启用：按数字键1-9传送到对应存档点');
+        console.log('========== Debug模式已启用 ==========');
+        console.log('数字键1-9: 传送到对应存档点');
+        console.log('0键: 传送到起始点');
+        console.log('T键: 触发Boss战');
+        console.log('G键: 满血满精力');
+        console.log('C键: 增加100金币');
+        console.log('B键: 切换Boss攻击范围显示');
+        console.log('=====================================');
         
         // 为每个数字键设置传送功能
         for (let i = 1; i <= 9; i++) {
@@ -352,6 +359,12 @@ class GameScene extends Phaser.Scene {
         const keyC = this.input.keyboard.addKey('C');
         keyC.on('down', () => {
             this.debugAddCoins();
+        });
+        
+        // 按B键切换Boss Debug显示
+        const keyB = this.input.keyboard.addKey('B');
+        keyB.on('down', () => {
+            this.debugToggleBossDebug();
         });
     }
     
@@ -409,6 +422,21 @@ class GameScene extends Phaser.Scene {
         window.gameData.coins += 100;
         this.uiManager.updateCoinDisplay(window.gameData.coins);
         this.uiManager.showGameMessage('Debug: +100金币', 1500);
+    }
+    
+    debugToggleBossDebug() {
+        if (this.boss) {
+            const currentState = this.boss.debugMode || false;
+            this.boss.setDebugMode(!currentState);
+            
+            const message = !currentState ? 
+                'Debug: Boss攻击范围显示[开启]' : 
+                'Debug: Boss攻击范围显示[关闭]';
+            this.uiManager.showGameMessage(message, 1500);
+            console.log(message);
+        } else {
+            this.uiManager.showGameMessage('Debug: Boss未出现', 1500);
+        }
     }
     
     showTutorial(properties) {

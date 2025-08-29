@@ -68,7 +68,13 @@ const GameConfig = {
         ATTACK_RADIUS: 50,
         ATTACK_INTERVAL: 2000,
         SCALE: 1.0,
-        FRAME_RATE: 10
+        FRAME_RATE: 10,
+        // 传送技能配置
+        TELEPORT_COOLDOWN: 2000,      // 传送冷却时间（20秒）
+        TELEPORT_DISTANCE: 150,         // 触发传送的距离阈值
+        NO_ATTACK_THRESHOLD: 8000,      // 多久没攻击触发传送（8秒）
+        TELEPORT_OFFSET_MIN: 60,        // 传送到玩家附近的最小距离
+        TELEPORT_OFFSET_MAX: 100        // 传送到玩家附近的最大距离
     },
     
     // 掉落物
