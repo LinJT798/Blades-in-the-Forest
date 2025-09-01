@@ -49,6 +49,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 动画管理器
         this.animationManager = new AnimationManager(scene);
         
+        // Debug日志开关（仅用于观察硬直/动画切换，不影响逻辑）
+        // 已移除日志输出
+        
         // 输入控制
         this.setupInputs();
         
@@ -191,10 +194,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     handleInput(delta) {
-        // 如果被眩晕，限制移动
+        // 如果被眩晕，完全禁用所有输入
         if (this.states.isStunned) {
-            this.body.setVelocityX(0);
-            return;
+            // 保持击退速度衰减
+            this.body.setVelocityX(this.body.velocity.x * 0.9);
+            return;  // 提前返回，跳过所有输入处理
         }
         
         // 防御状态
@@ -367,8 +371,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     attack() {
-        // 如果正在防御或精力不足，不能攻击
-        if (this.states.isDefending || this.currentSP < GameConfig.SP_COST_ATTACK) {
+        // 如果被眩晕、正在防御或精力不足，不能攻击
+        if (this.states.isStunned || this.states.isDefending || this.currentSP < GameConfig.SP_COST_ATTACK) {
             return;
         }
         
@@ -487,6 +491,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 受击硬直
         this.states.isStunned = true;
         this.states.isAttacking = false;
+        
         
         // 击退
         const knockbackDirection = this.states.facingRight ? -1 : 1;

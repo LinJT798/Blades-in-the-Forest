@@ -89,6 +89,16 @@ class AnimationManager {
         if (currentAnimKey === 'death') {
             return false;
         }
+
+        // 例外规则：硬直刚结束时，允许玩家从 be_attacked 立即切到攻击动画
+        // 目的：避免解控瞬间还需等待 be_attacked 播到 80% 才能出招，造成“卡一拍”体感
+        if (
+            sprite && sprite.name === 'player' && sprite.states && sprite.states.isStunned === false &&
+            currentAnimKey === 'be_attacked' &&
+            (newAnimation === 'attack_1hit' || newAnimation === 'combo_attack')
+        ) {
+            return true;
+        }
         
         // 如果当前动画已经播放完毕（非循环动画），允许切换到任何动画
         if (!sprite.anims.isPlaying || 
