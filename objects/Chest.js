@@ -27,8 +27,8 @@ class Chest extends Phaser.Physics.Arcade.Sprite {
             const chestId = `${type}_${x}_${y}`;
             if (window.gameData.chestsOpened.includes(chestId)) {
                 this.isOpened = true;
-                // 显示打开状态的最后一帧
-                this.setFrame(this.texture.frameTotal - 1);
+                // 显示打开状态的最后一帧（第4帧）
+                this.setFrame(4);
             }
         }
     }
@@ -131,7 +131,14 @@ class Chest extends Phaser.Physics.Arcade.Sprite {
         
         // 动画完成后保持最后一帧
         this.once('animationcomplete', () => {
-            this.setFrame(this.texture.frameTotal - 1);
+            // 停止动画并停留在最后一帧
+            this.anims.stop();
+            // 根据宝箱类型设置到正确的打开状态帧
+            // 通常宝箱动画有4-5帧，最后一帧是完全打开状态
+            const textureKey = this.type === 'small' ? 'chest_small' : 'chest_large';
+            this.setTexture(textureKey);
+            // 假设宝箱有5帧（0-4），第4帧是完全打开状态
+            this.setFrame(4);
         });
         
         // 生成掉落物

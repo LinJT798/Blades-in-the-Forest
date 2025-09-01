@@ -83,7 +83,7 @@ const AudioConfig = {
         INTERACT: {
             CHEST_OPEN: {
                 key: 'open',  // 宝箱打开音效
-                volume: 0.6
+                volume: 0.9
             },
             SAVE_POINT: {
                 key: 'save',  // 存档音效
