@@ -212,6 +212,11 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     
     onHit() {
+        // 检查场景是否有效
+        if (!this.scene || !this.scene.time) {
+            return;
+        }
+        
         // 受击硬直
         this.isStunned = true;
         this.isAttacking = false;  // 中断攻击
@@ -219,18 +224,24 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         // 受击闪烁
         this.setTint(0xff0000);
         this.scene.time.delayedCall(100, () => {
-            this.clearTint();
+            if (this.active) {
+                this.clearTint();
+            }
         });
         
         // 短暂无敌
         this.isInvincible = true;
         this.scene.time.delayedCall(300, () => {
-            this.isInvincible = false;
+            if (this.active) {
+                this.isInvincible = false;
+            }
         });
         
         // 硬直恢复时间（比无敌时间短，让敌人能更快恢复行动）
         this.scene.time.delayedCall(200, () => {
-            this.isStunned = false;
+            if (this.active) {
+                this.isStunned = false;
+            }
         });
         
         // 击退效果由CombatSystem统一处理
@@ -239,6 +250,11 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     die() {
         // 检查是否已经死亡，避免重复调用
         if (this.isDead) {
+            return;
+        }
+        
+        // 检查场景是否有效
+        if (!this.scene || !this.scene.time) {
             return;
         }
         
@@ -252,14 +268,18 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         }
         
         // 播放死亡动画
-        this.animationManager.playAnimation(this, 'death');
+        if (this.animationManager) {
+            this.animationManager.playAnimation(this, 'death');
+        }
         
         // 立即触发掉落
         this.dropItems();
         
         // 延迟销毁敌人精灵
         this.scene.time.delayedCall(2000, () => {
-            this.destroy();
+            if (this.active) {
+                this.destroy();
+            }
         });
     }
     

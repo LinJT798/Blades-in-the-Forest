@@ -718,6 +718,10 @@ class GameScene extends Phaser.Scene {
             }
             
             if (enemy.x >= currentX && enemy.x < nextSavePointX) {
+                // 先从战斗系统中移除
+                if (this.combatSystem) {
+                    this.combatSystem.removeEnemy(enemy);
+                }
                 // 销毁区域内的敌人
                 if (enemy.active) {
                     enemy.destroy();
@@ -733,6 +737,10 @@ class GameScene extends Phaser.Scene {
                 if (spawn.x >= currentX && spawn.x < nextSavePointX) {
                     const slime = new Slime(this, spawn.x, spawn.y);
                     this.enemies.push(slime);
+                    // 添加到战斗系统
+                    if (this.combatSystem) {
+                        this.combatSystem.addEnemy(slime);
+                    }
                     this.physicsSystem.setupEnemyCollisions(
                         [slime],
                         this.tileLayer,
@@ -747,6 +755,10 @@ class GameScene extends Phaser.Scene {
                 if (spawn.x >= currentX && spawn.x < nextSavePointX) {
                     const skeleton = new Skeleton(this, spawn.x, spawn.y);
                     this.enemies.push(skeleton);
+                    // 添加到战斗系统
+                    if (this.combatSystem) {
+                        this.combatSystem.addEnemy(skeleton);
+                    }
                     this.physicsSystem.setupEnemyCollisions(
                         [skeleton],
                         this.tileLayer,

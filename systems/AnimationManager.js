@@ -73,6 +73,11 @@ class AnimationManager {
     }
     
     shouldPlayAnimation(sprite, newAnimation) {
+        // 防护检查：确保sprite和anims存在
+        if (!sprite || !sprite.anims) {
+            return false;
+        }
+        
         // 如果没有当前动画，可以播放
         if (!sprite.anims.currentAnim) {
             return true;
