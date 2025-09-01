@@ -747,6 +747,12 @@ class GameScene extends Phaser.Scene {
         this.player.respawn(spawnPoint.x, spawnPoint.y);
         this.isGameOver = false;
         
+        // 清除所有存档点信息
+        if (window.gameData) {
+            window.gameData.savePoints = {};
+            window.gameData.currentSavePoint = null;
+        }
+        
         // 重置Boss状态（如果在Boss战中死亡）
         if (this.boss) {
             this.resetBoss();

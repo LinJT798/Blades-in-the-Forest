@@ -110,7 +110,13 @@ class SavePoint extends Phaser.Physics.Arcade.Sprite {
     activateSavePoint(player) {
         this.isActivated = true;
         
-        // 保存游戏状态
+        // 第一次激活时回复30点生命值
+        const healAmount = 30;
+        const oldHP = player.currentHP;
+        player.heal(healAmount);
+        const actualHeal = player.currentHP - oldHP;
+        
+        // 保存游戏状态（保存回复后的状态）
         this.saveGameState(player);
         
         // 播放存档动画
@@ -119,8 +125,15 @@ class SavePoint extends Phaser.Physics.Arcade.Sprite {
         // 更新光效
         this.updateGlowEffect();
         
-        // 显示存档成功消息
-        this.scene.uiManager.showGameMessage('存档成功！', 2000);
+        // 显示存档成功消息和回复提示
+        if (actualHeal > 0) {
+            this.scene.uiManager.showGameMessage(`存档成功！生命值+${actualHeal}`, 2000);
+            
+            // 显示回复数字效果
+            this.showHealEffect(actualHeal);
+        } else {
+            this.scene.uiManager.showGameMessage('存档成功！', 2000);
+        }
         
         // 播放存档音效
         if (this.scene.audioManager) {
@@ -240,6 +253,55 @@ class SavePoint extends Phaser.Physics.Arcade.Sprite {
                         this.saveHint.destroy();
                         this.saveHint = null;
                     }
+                }
+            });
+        }
+    }
+    
+    showHealEffect(healAmount) {
+        // 创建回复数字
+        const healText = this.scene.add.text(this.x, this.y - 50, `+${healAmount}`, {
+            fontSize: '24px',
+            fontStyle: 'bold',
+            color: '#00ff00',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5);
+        healText.setDepth(150);
+        
+        // 上升并淡出动画
+        this.scene.tweens.add({
+            targets: healText,
+            y: this.y - 80,
+            alpha: 0,
+            duration: 1500,
+            ease: 'Power2',
+            onComplete: () => {
+                healText.destroy();
+            }
+        });
+        
+        // 创建绿色粒子效果
+        for (let i = 0; i < 6; i++) {
+            const particle = this.scene.add.circle(
+                this.x + Phaser.Math.Between(-20, 20),
+                this.y - 20,
+                3,
+                0x00ff00,
+                0.8
+            );
+            particle.setDepth(99);
+            
+            this.scene.tweens.add({
+                targets: particle,
+                y: this.y - 60 - Phaser.Math.Between(10, 30),
+                x: particle.x + Phaser.Math.Between(-30, 30),
+                alpha: 0,
+                scale: 0.5,
+                duration: 1000 + Phaser.Math.Between(0, 500),
+                ease: 'Power2',
+                onComplete: () => {
+                    particle.destroy();
                 }
             });
         }
