@@ -71,6 +71,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.comboFrameEnd = 6;
         this.comboHitEmitted = false; // 连击判定是否已触发（防重复）
         
+        // 呼吸回血相关
+        this.idleTime = 0; // 静止时间计时器
+        this.isRegenerating = false; // 是否正在回血
+        this.regenParticles = []; // 存储回血粒子
+        this.lastPosition = { x: x, y: y }; // 记录上一帧位置
+        
         // 设置动画事件
         this.setupAnimationEvents();
         
@@ -622,21 +628,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
                     this.recoverSP(recoveryRate / 10); // 除以10因为每100ms执行一次
                 }
                 
-                // 静止回血buff
-                if (window.gameData.buffs && window.gameData.buffs.idleRegen) {
-                    const speed = Math.abs(this.body.velocity.x);
-                    const isIdle = speed <= 10 && !this.states.isAttacking && !this.states.isDefending;
-                    
-                    if (isIdle && this.currentHP < this.maxHP) {
-                        const regenAmount = window.gameData.buffs.idleRegen / 10; // 每100ms的回复量
-                        this.currentHP = Math.min(this.maxHP, this.currentHP + regenAmount);
-                        
-                        // 更新全局数据
-                        if (window.gameData) {
-                            window.gameData.playerHP = this.currentHP;
-                        }
-                    }
-                }
+                // 呼吸回血机制 - 检查是否静止（需要购买静息回复卡片）
+                this.checkIdleRegen();
             },
             loop: true
         });
@@ -817,6 +810,149 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             this.timers.spRecoveryTimer.destroy();
         }
         
+        // 清理回血相关资源
+        this.stopRegeneration();
+        
         super.destroy();
+    }
+    
+    checkIdleRegen() {
+        // 检查是否购买了静息回复卡片
+        if (!window.gameData.buffs || !window.gameData.buffs.idleRegen) {
+            // 没有购买静息回复卡片，不执行回血逻辑
+            if (this.isRegenerating) {
+                this.stopRegeneration();
+            }
+            return;
+        }
+        
+        const speed = Math.abs(this.body.velocity.x);
+        const verticalSpeed = Math.abs(this.body.velocity.y);
+        const isMoving = speed > 5 || verticalSpeed > 50; // 允许微小的垂直速度（落地时）
+        const isActing = this.states.isAttacking || this.states.isDefending || this.states.isDead;
+        
+        // 判断是否完全静止
+        if (!isMoving && !isActing) {
+            // 增加静止时间
+            this.idleTime += 0.1; // 每100ms增加0.1秒
+            
+            // 静止2秒后开始回血
+            if (this.idleTime >= 2.0 && this.currentHP < this.maxHP) {
+                if (!this.isRegenerating) {
+                    this.startRegeneration();
+                }
+                
+                // 根据购买的卡片数量计算回复量
+                const regenPerSecond = window.gameData.buffs.idleRegen || 2;
+                const regenAmount = regenPerSecond / 10; // 每100ms的回复量
+                this.currentHP = Math.min(this.maxHP, this.currentHP + regenAmount);
+                
+                // 更新全局数据
+                if (window.gameData) {
+                    window.gameData.playerHP = this.currentHP;
+                }
+            }
+        } else {
+            // 移动或行动时重置计时器
+            if (this.idleTime > 0) {
+                this.idleTime = 0;
+                if (this.isRegenerating) {
+                    this.stopRegeneration();
+                }
+            }
+        }
+    }
+    
+    startRegeneration() {
+        this.isRegenerating = true;
+        
+        // 创建持续的粒子效果
+        this.createRegenParticles();
+        
+        // 定期创建新的粒子
+        this.regenParticleTimer = this.scene.time.addEvent({
+            delay: 200, // 每200ms创建一批新粒子
+            callback: () => {
+                if (this.isRegenerating) {
+                    this.createRegenParticles();
+                }
+            },
+            loop: true
+        });
+    }
+    
+    createRegenParticles() {
+        // 创建8个向外扩散的绿色粒子
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i + Math.random() * 0.5;
+            const startRadius = 10;
+            const endRadius = 35 + Math.random() * 10;
+            
+            const particle = this.scene.add.circle(
+                this.x + Math.cos(angle) * startRadius,
+                this.y - 10 + Math.sin(angle) * startRadius,
+                2 + Math.random() * 2,
+                0x00ff00
+            );
+            
+            particle.setDepth(this.depth - 1);
+            particle.setAlpha(0.8);
+            
+            // 粒子动画
+            this.scene.tweens.add({
+                targets: particle,
+                x: this.x + Math.cos(angle) * endRadius,
+                y: this.y - 10 + Math.sin(angle) * endRadius,
+                alpha: 0,
+                scale: 0.5,
+                duration: 800 + Math.random() * 400,
+                ease: 'Power2',
+                onComplete: () => {
+                    particle.destroy();
+                    // 从数组中移除
+                    const index = this.regenParticles.indexOf(particle);
+                    if (index > -1) {
+                        this.regenParticles.splice(index, 1);
+                    }
+                }
+            });
+            
+            this.regenParticles.push(particle);
+        }
+        
+        // 添加一个淡绿色的光环效果
+        const glow = this.scene.add.circle(this.x, this.y - 10, 25, 0x00ff00);
+        glow.setAlpha(0.15);
+        glow.setDepth(this.depth - 1);
+        
+        this.scene.tweens.add({
+            targets: glow,
+            scale: 1.5,
+            alpha: 0,
+            duration: 1000,
+            ease: 'Power2',
+            onComplete: () => {
+                glow.destroy();
+            }
+        });
+    }
+    
+    stopRegeneration() {
+        this.isRegenerating = false;
+        
+        // 停止粒子生成定时器
+        if (this.regenParticleTimer) {
+            this.regenParticleTimer.destroy();
+            this.regenParticleTimer = null;
+        }
+        
+        // 清理现有粒子
+        this.regenParticles.forEach(particle => {
+            if (particle && particle.active) {
+                this.scene.tweens.killTweensOf(particle);
+                particle.destroy();
+            }
+        });
+        this.regenParticles = [];
     }
 }
