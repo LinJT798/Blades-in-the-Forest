@@ -7,6 +7,12 @@ class MenuScene extends Phaser.Scene {
     create() {
         const { width, height } = this.cameras.main;
         
+        // 创建全局音频管理器（如果不存在）
+        if (!this.game.audioManager) {
+            this.game.audioManager = new AudioManager(this);
+            this.game.audioManager.playBGM('bg');
+        }
+        
         // 创建视差背景
         this.createParallaxBackground();
         

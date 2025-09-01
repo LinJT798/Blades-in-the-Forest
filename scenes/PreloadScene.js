@@ -108,6 +108,15 @@ class PreloadScene extends Phaser.Scene {
             margin: 0
         });
         
+        // 加载音频资源
+        this.load.audio('bg', 'Asset/sound/bg.mp3');
+        this.load.audio('bg_boss', 'Asset/sound/bg_boss.mp3');
+        this.load.audio('attack_1', 'Asset/sound/attack_1.mp3');
+        this.load.audio('attack_2', 'Asset/sound/attack_2.mp3');
+        this.load.audio('attacked', 'Asset/sound/attacked.mp3');
+        this.load.audio('save', 'Asset/sound/save.mp3');
+        this.load.audio('open', 'Asset/sound/open.mp3');
+        
         // 加载UI图标
         this.load.image('coin_icon', 'Asset/animation/金币图标/coin000.png');
         this.load.image('heart_icon', 'Asset/animation/心心图标/heart_pic000.png');

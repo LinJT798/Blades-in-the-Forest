@@ -124,6 +124,11 @@ class Chest extends Phaser.Physics.Arcade.Sprite {
         const animKey = this.type === 'small' ? 'chest_small_open' : 'chest_large_open';
         this.play(animKey);
         
+        // 播放宝箱打开音效
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playByTrigger('CHEST_OPEN');
+        }
+        
         // 动画完成后保持最后一帧
         this.once('animationcomplete', () => {
             this.setFrame(this.texture.frameTotal - 1);

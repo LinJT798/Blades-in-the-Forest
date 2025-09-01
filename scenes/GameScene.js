@@ -49,6 +49,17 @@ class GameScene extends Phaser.Scene {
         // 创建UI
         this.createUI();
         
+        // 使用全局音频管理器（从MenuScene继承）
+        this.audioManager = this.game.audioManager;
+        // 如果没有音频管理器（直接进入游戏场景的情况）
+        if (!this.audioManager) {
+            this.audioManager = new AudioManager(this);
+            this.audioManager.playBGM('bg');
+            this.game.audioManager = this.audioManager;
+        }
+        // 更新音频管理器的场景引用
+        this.audioManager.scene = this;
+        
         // 设置摄像机
         this.setupCamera();
         
@@ -144,7 +155,8 @@ class GameScene extends Phaser.Scene {
         
         if (chestPositions.small) {
             chestPositions.small.forEach(pos => {
-                const chest = new Chest(this, pos.x, pos.y, 'small');
+                // 小宝箱向上偏移1像素
+                const chest = new Chest(this, pos.x, pos.y - 3, 'small');
                 this.chests.push(chest);
             });
         }
@@ -717,7 +729,6 @@ class GameScene extends Phaser.Scene {
             color: '#ffffff'
         }).setOrigin(0.5);
         btnText.setScrollFactor(0); // 固定在屏幕上
-        
         btn.on('pointerdown', callback);
         btn.on('pointerover', () => {
             btn.setFillStyle(0x34495e);
@@ -761,6 +772,11 @@ class GameScene extends Phaser.Scene {
             // 重置摄像机边界，确保摄像机能正常跟随玩家
             this.cameras.main.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT);
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+            
+            // 复活后恢复普通背景音乐
+            if (this.audioManager) {
+                this.audioManager.playByTrigger('PLAYER_RESPAWN');
+            }
         }
         
         // 恢复buff状态（卡片效果）
@@ -966,12 +982,22 @@ class GameScene extends Phaser.Scene {
     startBossBattle() {
         this.isBossBattle = true;
         this.uiManager.showBossHealthBar();
+        
+        // 切换到Boss战斗音乐
+        if (this.audioManager) {
+            this.audioManager.playByTrigger('BOSS_ENTER');
+        }
     }
     
     handleBossDefeat() {
         console.log('执行handleBossDefeat');
         this.isBossBattle = false;
         this.uiManager.hideBossHealthBar();
+        
+        // Boss战胜利后恢复普通音乐
+        if (this.audioManager) {
+            this.audioManager.playByTrigger('BOSS_DEFEAT');
+        }
         
         // 显示通关界面
         this.showVictoryScreen();

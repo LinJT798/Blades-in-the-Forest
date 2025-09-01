@@ -164,6 +164,12 @@ class CombatSystem {
             target.currentHP = Math.max(0, target.currentHP - actualDamage);
         }
         
+        // 播放受击音效（如果目标是敌人）
+        if (source === 'player' && target.name !== 'player' && this.scene.audioManager) {
+            const hitType = target.name === 'death' ? 'BOSS' : 'ENEMY';
+            this.scene.audioManager.playHitSound(hitType);
+        }
+        
         // 显示伤害数字
         this.showDamageNumber(
             target.x,

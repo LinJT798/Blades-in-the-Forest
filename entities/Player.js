@@ -413,6 +413,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     triggerAttackHitbox() {
+        // 播放普通攻击音效（这里永远是普通攻击，连击有单独的方法）
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playAttackSound(false); // false表示普通攻击
+        }
+        
         // 创建攻击判定区域
         const attackRange = this.states.facingRight ? 30 : -30;  // 减少距离，让碰撞盒更贴近玩家
         const hitboxX = this.x + attackRange;
@@ -434,6 +439,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     triggerComboHitbox() {
+        // 播放连击音效
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playAttackSound(true); // true表示连击
+        }
+        
         // 创建连击判定区域
         const attackRange = this.states.facingRight ? 40 : -40;  // 减少距离，让碰撞盒更贴近玩家
         const hitboxX = this.x + attackRange;
@@ -494,6 +504,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     onHit() {
+        // 播放受击音效
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playHitSound('PLAYER');
+        }
+        
         // 受击硬直
         this.states.isStunned = true;
         this.states.isAttacking = false;
@@ -531,6 +546,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     onDefendHit() {
+        // 播放防御受击音效
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playHitSound('PLAYER');
+        }
+        
         // 防御状态下被击中，保持防御动画，只有击退和闪烁
         
         // 轻微击退（防御时击退更小）

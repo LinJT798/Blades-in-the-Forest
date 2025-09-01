@@ -7,6 +7,12 @@ class GameOverScene extends Phaser.Scene {
     create() {
         const { width, height } = this.cameras.main;
         
+        // 使用全局音频管理器
+        this.audioManager = this.game.audioManager;
+        if (this.audioManager) {
+            this.audioManager.scene = this;
+        }
+        
         // 获取游戏数据
         const gameData = window.gameData || {};
         

@@ -122,8 +122,10 @@ class SavePoint extends Phaser.Physics.Arcade.Sprite {
         // 显示存档成功消息
         this.scene.uiManager.showGameMessage('存档成功！', 2000);
         
-        // 播放音效（如果有）
-        // this.scene.sound.play('save_sound');
+        // 播放存档音效
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playByTrigger('SAVE_POINT_USE');
+        }
     }
     
     saveGameState(player) {
