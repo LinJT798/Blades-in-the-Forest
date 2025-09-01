@@ -17,35 +17,20 @@ class MenuScene extends Phaser.Scene {
         this.createParallaxBackground();
         
         // 添加游戏标题
-        const title = this.add.text(width / 2, height / 2 - 60, '神秘森林', {
-            fontSize: '48px',
+        const title = this.add.text(width / 2, height / 2 - 50, 'Blades in the Forest', {
+            fontSize: '42px',
             fontFamily: 'Arial',
             color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 4
         }).setOrigin(0.5);
         
-        // 添加副标题
-        const subtitle = this.add.text(width / 2, height / 2 - 20, 'Mysterious Forest', {
-            fontSize: '20px',
-            fontFamily: 'Arial',
-            color: '#cccccc'
-        }).setOrigin(0.5);
-        
         // 创建开始按钮
         const startButton = this.createButton(
             width / 2, 
-            height / 2 + 40, 
+            height / 2 + 20, 
             '开始游戏',
             () => this.startGame()
-        );
-        
-        // 创建退出按钮
-        const exitButton = this.createButton(
-            width / 2, 
-            height / 2 + 80, 
-            '退出游戏',
-            () => this.exitGame()
         );
         
         // 添加操作说明
@@ -154,30 +139,6 @@ class MenuScene extends Phaser.Scene {
             // 切换到游戏场景
             this.scene.start('GameScene');
         });
-    }
-    
-    exitGame() {
-        // 在网页环境中，显示退出确认
-        const confirmExit = confirm('确定要退出游戏吗？');
-        if (confirmExit) {
-            // 显示感谢信息
-            this.add.text(
-                this.cameras.main.width / 2,
-                this.cameras.main.height / 2,
-                '感谢游玩！',
-                {
-                    fontSize: '32px',
-                    color: '#ffffff',
-                    stroke: '#000000',
-                    strokeThickness: 4
-                }
-            ).setOrigin(0.5).setDepth(100);
-            
-            // 停止游戏
-            this.time.delayedCall(2000, () => {
-                this.game.destroy(true);
-            });
-        }
     }
     
     update(time, delta) {

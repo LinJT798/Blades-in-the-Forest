@@ -80,7 +80,7 @@ class PreloadScene extends Phaser.Scene {
             margin: 0
         });
         this.load.spritesheet('chest_large', 'Asset/animation/大宝箱/box_2.png', {
-            frameWidth: 16,  // 修正为实际尺寸
+            frameWidth: 32,  // 修正为实际尺寸
             frameHeight: 20,
             spacing: 2,
             margin: 0

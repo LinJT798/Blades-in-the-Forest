@@ -22,23 +22,23 @@ const GameConfig = {
     PLAYER_MAX_SP: 100,
     PLAYER_ATTACK: 10,
     PLAYER_COMBO_ATTACK: 15,
-    DEFENSE_REDUCTION: 0.3, // 防御时减伤70%
+    DEFENSE_REDUCTION: 0.4, // 防御时减伤70%
     
     // 精力消耗
     SP_COST_RUN: 10, // per second
-    SP_COST_JUMP: 5,  // 降低跳跃消耗
-    SP_COST_ATTACK: 7,
+    SP_COST_JUMP: 10,  // 降低跳跃消耗
+    SP_COST_ATTACK: 10,
     SP_COST_COMBO: 15,
-    SP_COST_DEFENSE: 10, // per second
+    SP_COST_DEFENSE: 15, // per second
     
     // 精力恢复
-    SP_RECOVER_IDLE: 10, // per second
-    SP_RECOVER_WALK: 6, // per second
+    SP_RECOVER_IDLE: 15, // per second
+    SP_RECOVER_WALK: 10, // per second
     
     // 敌人属性
     SLIME: {
-        HP: 20,
-        ATTACK: 10,
+        HP: 30,
+        ATTACK: 15,
         PATROL_SPEED: 30,
         DETECT_RADIUS: 80,
         ATTACK_RADIUS: 25,
@@ -49,8 +49,8 @@ const GameConfig = {
     },
     
     SKELETON: {
-        HP: 30,
-        ATTACK: 15,
+        HP: 50,
+        ATTACK: 20,
         PATROL_SPEED: 40,
         CHASE_SPEED: 60,
         DETECT_RADIUS: 120,
@@ -62,8 +62,8 @@ const GameConfig = {
     },
     
     DEATH_BOSS: {
-        HP: 100,
-        ATTACK: 20,
+        HP: 200,
+        ATTACK: 25,
         MOVE_SPEED: 50,
         ATTACK_RADIUS: 50,
         ATTACK_INTERVAL: 2000,
@@ -82,9 +82,9 @@ const GameConfig = {
             WAIT_BEFORE_WAVES: 1500,   // 虚化后等待时间再发射光波
             WAVE_INTERVAL: 1600,        // 每波光波间隔
             WAVE_COUNT: 3,             // 光波波数
-            WAVES_PER_BURST: 4,        // 每波的光波数量
+            WAVES_PER_BURST: 6,        // 每波的光波数量
             WAVE_SPEED: 50,            // 光波速度（原150改为80）
-            WAVE_DAMAGE: 15,           // 光波伤害
+            WAVE_DAMAGE: 20,           // 光波伤害
             WAVE_SCALE: 2.5,           // 光波缩放
             WAVE_LIFETIME: 4000,       // 光波存活时间
             RECOVERY_DELAY: 1500       // 最后一波后恢复延迟
