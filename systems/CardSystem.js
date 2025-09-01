@@ -52,7 +52,7 @@ class CardSystem {
                     if (!window.gameData.buffs) {
                         window.gameData.buffs = {};
                     }
-                    window.gameData.buffs.lifesteal = (window.gameData.buffs.lifesteal || 0) + 0.2;
+                    window.gameData.buffs.lifesteal = (window.gameData.buffs.lifesteal || 0) + 0.1;
                     return true;
                 }
             },
@@ -126,17 +126,11 @@ class CardSystem {
             cardId => !shopState.purchasedCards.includes(cardId)
         );
         
-        if (availableCards.length < 3) {
-            // 如果可用卡片不足3张，补充一些已购买的
-            const needed = 3 - availableCards.length;
-            const purchasedOptions = shopState.purchasedCards.slice(0, needed);
-            availableCards.push(...purchasedOptions);
-        }
-        
-        // 随机选择3张
+        // 随机选择最多3张（如果可用卡片不足3张，就显示所有可用的）
         const newCards = [];
         const tempAvailable = [...availableCards];
-        for (let i = 0; i < Math.min(3, tempAvailable.length); i++) {
+        const cardCount = Math.min(3, tempAvailable.length);
+        for (let i = 0; i < cardCount; i++) {
             const randomIndex = Math.floor(Math.random() * tempAvailable.length);
             newCards.push(tempAvailable.splice(randomIndex, 1)[0]);
         }

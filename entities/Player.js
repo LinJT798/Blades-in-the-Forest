@@ -466,7 +466,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     takeDamage(damage) {
         if (this.states.isInvincible || this.states.isDead) {
-            return;
+            return 0;
         }
         
         // 计算实际伤害
@@ -492,7 +492,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 检查死亡
         if (this.currentHP <= 0) {
             this.die();
-            return;
+            return actualDamage;
         }
         
         // 受击效果（防御状态特殊处理）
@@ -501,6 +501,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         } else {
             this.onHit();
         }
+        
+        return actualDamage;
     }
     
     onHit() {

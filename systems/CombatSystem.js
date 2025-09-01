@@ -84,16 +84,18 @@ class CombatSystem {
         
         // 检测与玩家的碰撞
         if (this.checkCollision(hitbox, this.player)) {
-            // 对玩家造成伤害
-            this.player.takeDamage(attackData.damage);
+            // 对玩家造成伤害并获取实际伤害值
+            const actualDamage = this.player.takeDamage(attackData.damage) || 0;
             
-            // 显示伤害数字
-            this.showDamageNumber(
-                this.player.x,
-                this.player.y - 30,
-                attackData.damage,
-                0xff0000
-            );
+            // 显示实际伤害数字
+            if (actualDamage > 0) {
+                this.showDamageNumber(
+                    this.player.x,
+                    this.player.y - 30,
+                    actualDamage,
+                    0xff0000
+                );
+            }
         }
         
         // 销毁判定盒（Debug 模式下延长显示时间便于观察）

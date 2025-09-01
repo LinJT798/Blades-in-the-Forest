@@ -24,7 +24,7 @@ const TutorialConfig = {
             },
             {
                 text: "奔跑、跳跃都会消耗精力",
-                delay: 8000,
+                delay: 11000,
                 duration: 3000
             }
         ]
@@ -54,12 +54,12 @@ const TutorialConfig = {
             },
             {
                 text: "按 K 键可以防御，减少受到的伤害",
-                delay: 9500,
+                delay: 9000,
                 duration: 3000
             },
             {
                 text: "防御、攻击都要消耗精力",
-                delay: 9500,
+                delay: 12000,
                 duration: 3000
             }
         ]
@@ -83,7 +83,7 @@ const TutorialConfig = {
                 duration: 3000
             },
             {
-                text: "爬墙时按空格可以进行墙跳",
+                text: "爬墙时按空格和方向键可以进行墙跳",
                 delay: 6000,
                 duration: 3000
             }
