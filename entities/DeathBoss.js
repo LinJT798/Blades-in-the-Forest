@@ -100,8 +100,26 @@ class DeathBoss extends Enemy {
         const combatSystem = this.scene.combatSystem;
         if (!combatSystem) return;
         
+        // 获取玩家
+        const player = this.scene.player;
+        if (!player || player.states.isDead) {
+            // 玩家不存在或死亡时，Boss停止移动
+            this.body.setVelocity(0, 0);
+            return;
+        }
+        
         // 获取玩家距离
         const playerDistance = combatSystem.getPlayerDistance(this);
+        
+        // 如果玩家不在检测范围内，Boss保持静止（不巡逻）
+        if (playerDistance > this.detectRadius) {
+            this.body.setVelocity(0, 0);
+            this.isChasing = false;
+            return;
+        }
+        
+        // 玩家在检测范围内，开始追击
+        this.isChasing = true;
         
         // 更新传送冷却
         if (this.teleportCooldown > 0) {
@@ -136,21 +154,18 @@ class DeathBoss extends Enemy {
             // 只有不在攻击状态时才移动
             if (!this.isAttacking) {
                 // 向玩家移动（包括垂直方向）
-                const player = this.scene.player;
-                if (player) {
-                    const dx = player.x - this.x;
-                    const dy = player.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 0) {
+                    // 计算归一化方向
+                    const dirX = dx / distance;
+                    const dirY = dy / distance;
                     
-                    if (distance > 0) {
-                        // 计算归一化方向
-                        const dirX = dx / distance;
-                        const dirY = dy / distance;
-                        
-                        // 设置速度（可以飞行追击）
-                        this.body.setVelocityX(dirX * GameConfig.DEATH_BOSS.MOVE_SPEED);
-                        this.body.setVelocityY(dirY * GameConfig.DEATH_BOSS.MOVE_SPEED * 0.5); // Y轴速度稍慢
-                    }
+                    // 设置速度（可以飞行追击）
+                    this.body.setVelocityX(dirX * GameConfig.DEATH_BOSS.MOVE_SPEED);
+                    this.body.setVelocityY(dirY * GameConfig.DEATH_BOSS.MOVE_SPEED * 0.5); // Y轴速度稍慢
                 }
             }
         }
@@ -512,7 +527,27 @@ class DeathBoss extends Enemy {
     }
     
     update(time, delta) {
-        super.update(time, delta);
+        // DeathBoss重写update，不调用父类的巡逻逻辑
+        if (this.isDead) {
+            return;
+        }
+        
+        // 检查是否在视野内
+        if (!this.isInView()) {
+            this.body.setVelocity(0, 0);
+            return;
+        }
+        
+        // 执行Boss的AI行为
+        this.updateAI(time, delta);
+        
+        // 更新动画
+        this.updateAnimation();
+        
+        // 更新朝向
+        this.updateDirection();
+        
+        // 更新阶段（已在updateAI中调用）
         
         // 更新Debug显示
         this.updateDebugDisplay();

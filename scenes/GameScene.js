@@ -631,6 +631,11 @@ class GameScene extends Phaser.Scene {
         this.player.respawn(spawnPoint.x, spawnPoint.y);
         this.isGameOver = false;
         
+        // 重置Boss状态（如果在Boss战中死亡）
+        if (this.boss) {
+            this.resetBoss();
+        }
+        
         // 恢复物理系统
         this.physics.resume();
     }
@@ -643,6 +648,15 @@ class GameScene extends Phaser.Scene {
         this.player.currentHP = savePointData.playerData.hp;
         this.player.currentSP = savePointData.playerData.sp || GameConfig.PLAYER_MAX_SP;
         window.gameData.coins = savePointData.playerData.coins;
+        
+        // 重置Boss状态（如果在Boss战中死亡）
+        if (this.boss) {
+            this.resetBoss();
+            
+            // 重置摄像机边界，确保摄像机能正常跟随玩家
+            this.cameras.main.setBounds(0, 0, GameConfig.MAP_WIDTH, GameConfig.MAP_HEIGHT);
+            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+        }
         
         // 恢复buff状态（卡片效果）
         if (savePointData.playerData.buffs) {
@@ -696,8 +710,13 @@ class GameScene extends Phaser.Scene {
         // 获取原始敌人出生点
         const enemySpawns = this.mapLoader.getEnemySpawnPoints();
         
-        // 清理当前区域内的所有敌人
+        // 清理当前区域内的所有敌人（但不包括Boss）
         this.enemies = this.enemies.filter(enemy => {
+            // Boss不应该被重置，它有自己的重置逻辑
+            if (enemy === this.boss) {
+                return true;
+            }
+            
             if (enemy.x >= currentX && enemy.x < nextSavePointX) {
                 // 销毁区域内的敌人
                 if (enemy.active) {
@@ -813,6 +832,16 @@ class GameScene extends Phaser.Scene {
     triggerBoss() {
         if (this.boss && !this.boss.active) {
             this.boss.spawn();
+            
+            // 确保Boss在enemies数组中（防止被resetEnemiesInRange误删后未恢复）
+            if (!this.enemies.includes(this.boss)) {
+                this.enemies.push(this.boss);
+                // 同时确保在战斗系统中
+                if (this.combatSystem) {
+                    this.combatSystem.addEnemy(this.boss);
+                }
+            }
+            
             this.uiManager.showGameMessage('死神降临！', 2000);
         }
     }
@@ -843,6 +872,18 @@ class GameScene extends Phaser.Scene {
             this.boss.body.enable = false;
         }
         
+        // 重置Boss位置到初始生成点
+        const enemySpawns = this.mapLoader.getEnemySpawnPoints();
+        if (enemySpawns.boss) {
+            this.boss.x = enemySpawns.boss.x;
+            this.boss.y = enemySpawns.boss.y - 50;
+            // 重置速度和物理属性
+            if (this.boss.body) {
+                this.boss.body.setVelocity(0, 0);
+                this.boss.body.setAllowGravity(false); // Boss不受重力影响
+            }
+        }
+        
         // 重置Boss状态
         this.boss.currentHP = this.boss.maxHP;
         this.boss.isDead = false;
@@ -852,6 +893,13 @@ class GameScene extends Phaser.Scene {
         this.boss.attackSpeedBonus = 0;
         this.boss.lastAttackTime = Date.now();
         this.boss.teleportCooldown = 0;
+        this.boss.isStunned = false;
+        
+        // 重置Enemy基类的属性
+        this.boss.isChasing = false;
+        this.boss.patrolDirection = 1;
+        this.boss.patrolCenter = this.boss.x;
+        this.boss.attackInterval = this.boss.baseAttackInterval;
         
         // 清除Boss动画和效果
         if (this.boss.anims) {
