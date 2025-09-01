@@ -29,6 +29,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.isAttacking = false;
         this.isInvincible = false;
         this.isChasing = false;
+        this.isStunned = false;  // 添加眩晕状态初始化
         this.facingRight = true;
         
         // AI相关

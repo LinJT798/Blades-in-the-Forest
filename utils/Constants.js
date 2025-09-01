@@ -74,7 +74,21 @@ const GameConfig = {
         TELEPORT_DISTANCE: 150,         // 触发传送的距离阈值
         NO_ATTACK_THRESHOLD: 8000,      // 多久没攻击触发传送（8秒）
         TELEPORT_OFFSET_MIN: 60,        // 传送到玩家附近的最小距离
-        TELEPORT_OFFSET_MAX: 100        // 传送到玩家附近的最大距离
+        TELEPORT_OFFSET_MAX: 100,       // 传送到玩家附近的最大距离
+        
+        // 阶段转换配置
+        PHASE_TRANSITION: {
+            FADE_DURATION: 500,        // 虚化动画时长
+            WAIT_BEFORE_WAVES: 1500,   // 虚化后等待时间再发射光波
+            WAVE_INTERVAL: 1600,        // 每波光波间隔
+            WAVE_COUNT: 3,             // 光波波数
+            WAVES_PER_BURST: 4,        // 每波的光波数量
+            WAVE_SPEED: 50,            // 光波速度（原150改为80）
+            WAVE_DAMAGE: 15,           // 光波伤害
+            WAVE_SCALE: 2.5,           // 光波缩放
+            WAVE_LIFETIME: 4000,       // 光波存活时间
+            RECOVERY_DELAY: 1500       // 最后一波后恢复延迟
+        }
     },
     
     // 掉落物

@@ -260,6 +260,7 @@ class GameScene extends Phaser.Scene {
         
         // BOSS被击败
         this.events.on('bossDefeated', () => {
+            console.log('GameScene收到bossDefeated事件');
             this.handleBossDefeat();
         });
         
@@ -864,18 +865,130 @@ class GameScene extends Phaser.Scene {
     }
     
     handleBossDefeat() {
+        console.log('执行handleBossDefeat');
         this.isBossBattle = false;
         this.uiManager.hideBossHealthBar();
-        this.uiManager.showGameMessage('胜利！', 3000);
         
-        // 延迟后进入结算场景
-        this.time.delayedCall(3000, () => {
-            this.scene.start('GameOverScene');
+        // 显示通关界面
+        this.showVictoryScreen();
+    }
+    
+    showVictoryScreen() {
+        // 创建半透明背景
+        const overlay = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY,
+            GameConfig.GAME_WIDTH,
+            GameConfig.GAME_HEIGHT,
+            0x000000,
+            0.7
+        ).setScrollFactor(0).setDepth(1000);
+        
+        // 通关文字
+        const victoryText = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 60,
+            '通关！',
+            {
+                fontSize: '48px',
+                color: '#FFD700',
+                stroke: '#000000',
+                strokeThickness: 6,
+                fontStyle: 'bold'
+            }
+        ).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+        
+        // 添加文字动画
+        this.tweens.add({
+            targets: victoryText,
+            scale: { from: 0, to: 1.2 },
+            duration: 500,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: victoryText,
+                    scale: 1,
+                    duration: 200,
+                    ease: 'Power2'
+                });
+            }
+        });
+        
+        // 重新开始按钮
+        const restartButton = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY + 40,
+            200,
+            50,
+            0x4CAF50
+        ).setScrollFactor(0).setDepth(1001).setInteractive();
+        
+        const restartText = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY + 40,
+            '重新开始',
+            {
+                fontSize: '24px',
+                color: '#FFFFFF',
+                fontStyle: 'bold'
+            }
+        ).setOrigin(0.5).setScrollFactor(0).setDepth(1002);
+        
+        // 按钮悬停效果
+        restartButton.on('pointerover', () => {
+            restartButton.setFillStyle(0x66BB6A);
+            this.input.setDefaultCursor('pointer');
+        });
+        
+        restartButton.on('pointerout', () => {
+            restartButton.setFillStyle(0x4CAF50);
+            this.input.setDefaultCursor('default');
+        });
+        
+        // 点击重新开始
+        restartButton.on('pointerdown', () => {
+            // 重置游戏数据
+            window.gameData = {
+                playerHP: GameConfig.PLAYER_MAX_HP,
+                playerSP: GameConfig.PLAYER_MAX_SP,
+                coins: 0,
+                buffs: {},
+                shopStates: {},
+                defeatedEnemies: [],
+                openedChests: [],
+                savePoints: []
+            };
+            
+            // 淡出效果
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('MenuScene');
+            });
         });
     }
     
     resetBoss() {
         if (!this.boss) return;
+        
+        // 清理所有光波
+        if (this.boss.phaseWaves && this.boss.phaseWaves.length > 0) {
+            this.boss.phaseWaves.forEach(wave => {
+                if (wave && wave.active) {
+                    wave.destroy();
+                }
+            });
+            this.boss.phaseWaves = [];
+        }
+        
+        // 重置Boss状态
+        this.boss.phase = 1; // 重置为第一阶段
+        this.boss.attackSpeedBonus = 0; // 重置攻击速度加成
+        this.boss.attackInterval = this.boss.baseAttackInterval; // 重置攻击间隔
+        this.boss.teleportCooldownTime = GameConfig.DEATH_BOSS.TELEPORT_COOLDOWN; // 重置传送冷却
+        this.boss.isPhaseTransitioning = false; // 重置阶段转换状态
+        this.boss.isStunned = false; // 解除眩晕
+        this.boss.alpha = 1; // 恢复完全不透明
+        this.boss.clearTint(); // 清除任何色调
         
         // 隐藏Boss
         this.boss.setVisible(false);
@@ -889,6 +1002,11 @@ class GameScene extends Phaser.Scene {
         if (enemySpawns.boss) {
             this.boss.x = enemySpawns.boss.x;
             this.boss.y = enemySpawns.boss.y - 50;
+            // 更新初始位置记录
+            if (this.boss.initialPosition) {
+                this.boss.initialPosition.x = this.boss.x;
+                this.boss.initialPosition.y = this.boss.y;
+            }
             // 重置速度和物理属性
             if (this.boss.body) {
                 this.boss.body.setVelocity(0, 0);
@@ -896,7 +1014,7 @@ class GameScene extends Phaser.Scene {
             }
         }
         
-        // 重置Boss状态
+        // 重置Boss血量
         this.boss.currentHP = this.boss.maxHP;
         this.boss.isDead = false;
         this.boss.isAttacking = false;

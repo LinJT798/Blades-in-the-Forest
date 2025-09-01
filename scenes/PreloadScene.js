@@ -64,6 +64,13 @@ class PreloadScene extends Phaser.Scene {
             spacing: 2,
             margin: 0
         });
+        // 加载死神火焰（光波）动画
+        this.load.spritesheet('death_fire', 'Asset/animation/死神火焰/death_fire.png', {
+            frameWidth: 16,
+            frameHeight: 28,
+            spacing: 2,
+            margin: 0
+        });
         
         // 加载宝箱精灵图（考虑padding）
         this.load.spritesheet('chest_small', 'Asset/animation/小宝箱/box_1.png', {

@@ -94,8 +94,10 @@ class Chest extends Phaser.Physics.Arcade.Sprite {
                 alpha: 0,
                 duration: 200,
                 onComplete: () => {
-                    this.interactionHint.destroy();
-                    this.interactionHint = null;
+                    if (this.interactionHint) {
+                        this.interactionHint.destroy();
+                        this.interactionHint = null;
+                    }
                 }
             });
         }

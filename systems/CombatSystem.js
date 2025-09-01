@@ -190,11 +190,14 @@ class CombatSystem {
                         y: target.y
                     });
                     
+                    // Boss会在自己的die()方法中触发bossDefeated事件
+                    // 这里只设置标志
                     if (target.name === 'death') {
                         if (window.gameData) {
                             window.gameData.bossDefeated = true;
                         }
-                        this.scene.events.emit('bossDefeated');
+                        // 不要重复触发事件，Boss的die()方法会处理
+                        // this.scene.events.emit('bossDefeated');
                     }
                 }
             } else {
@@ -241,12 +244,13 @@ class CombatSystem {
                 y: target.y
             });
             
-            // 如果是BOSS
+            // Boss会在自己的die()方法中触发bossDefeated事件
             if (target.name === 'death') {
                 if (window.gameData) {
                     window.gameData.bossDefeated = true;
                 }
-                this.scene.events.emit('bossDefeated');
+                // 不要重复触发事件
+                // this.scene.events.emit('bossDefeated');
             }
         }
         
