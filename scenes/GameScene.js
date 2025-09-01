@@ -286,30 +286,134 @@ class GameScene extends Phaser.Scene {
     }
     
     showInitialTutorial() {
-        // 显示基础操作提示
-        this.time.delayedCall(1000, () => {
-            this.uiManager.showTutorial('使用 A/D 移动，空格跳跃', 3000);
-        });
+        // 创建教学触发区域
+        this.setupTutorialZones();
+    }
+    
+    setupTutorialZones() {
+        // 记录已触发的教学
+        this.triggeredTutorials = new Set();
         
-        this.time.delayedCall(5000, () => {
-            this.uiManager.showTutorial('J 键攻击，K 键防御', 3000);
-        });
+        // 创建出生点教学区域（使用配置的固定位置）
+        this.createTutorialZone('spawn', TutorialConfig.SPAWN_TUTORIAL);
         
-        // 检查教学区域
-        const tutorials = this.mapLoader.getTutorialZones();
-        if (tutorials) {
-            tutorials.forEach(zone => {
-                // 创建触发区域
-                const trigger = this.add.zone(zone.x, zone.y, zone.width, zone.height);
-                this.physics.add.existing(trigger, true);
+        // 从地图对象层获取攻击教学位置
+        const attackTutorial = this.mapLoader.getTutorialByName('攻击教学');
+        if (attackTutorial) {
+            // 使用地图中的位置，但保留配置中的消息内容
+            const attackConfig = {
+                ...TutorialConfig.ATTACK_TUTORIAL,
+                x: attackTutorial.x,
+                y: attackTutorial.y,
+                width: attackTutorial.width || TutorialConfig.ATTACK_TUTORIAL.width,
+                height: attackTutorial.height || TutorialConfig.ATTACK_TUTORIAL.height
+            };
+            this.createTutorialZone('attack', attackConfig);
+        } else {
+            // 如果地图中没有，使用默认配置
+            this.createTutorialZone('attack', TutorialConfig.ATTACK_TUTORIAL);
+        }
+        
+        // 从地图对象层获取爬墙教学位置
+        const wallClimbTutorial = this.mapLoader.getTutorialByName('爬墙教学');
+        if (wallClimbTutorial) {
+            // 使用地图中的位置，但保留配置中的消息内容
+            const wallClimbConfig = {
+                ...TutorialConfig.WALL_CLIMB_TUTORIAL,
+                x: wallClimbTutorial.x,
+                y: wallClimbTutorial.y,
+                width: wallClimbTutorial.width || TutorialConfig.WALL_CLIMB_TUTORIAL.width,
+                height: wallClimbTutorial.height || TutorialConfig.WALL_CLIMB_TUTORIAL.height
+            };
+            this.createTutorialZone('wallClimb', wallClimbConfig);
+        } else {
+            // 如果地图中没有，使用默认配置
+            this.createTutorialZone('wallClimb', TutorialConfig.WALL_CLIMB_TUTORIAL);
+        }
+    }
+    
+    createTutorialZone(id, config) {
+        // 创建触发区域
+        const zone = this.add.zone(
+            config.x,
+            config.y,
+            config.width,
+            config.height
+        );
+        
+        this.physics.add.existing(zone, true);
+        
+        // 设置碰撞检测
+        this.physics.add.overlap(this.player, zone, () => {
+            // 检查是否已触发过
+            if (TutorialConfig.TRIGGER_ONCE && this.triggeredTutorials.has(id)) {
+                return;
+            }
+            
+            // 标记为已触发
+            this.triggeredTutorials.add(id);
+            
+            // 显示教学消息
+            this.showTutorialMessages(config.messages);
+            
+            // 如果只触发一次，销毁触发区域
+            if (TutorialConfig.TRIGGER_ONCE) {
+                zone.destroy();
+            }
+        });
+    }
+    
+    showTutorialMessages(messages) {
+        // 清除之前的教学文字
+        if (this.tutorialText) {
+            this.tutorialText.destroy();
+        }
+        
+        // 依次显示每条消息
+        messages.forEach(msg => {
+            this.time.delayedCall(msg.delay, () => {
+                // 移除旧的文字
+                if (this.tutorialText) {
+                    this.tutorialText.destroy();
+                }
                 
-                // 设置重叠检测
-                this.physics.add.overlap(this.player, trigger, () => {
-                    this.showTutorial(zone.properties);
-                    trigger.destroy(); // 只触发一次
+                // 创建新的教学文字
+                const x = this.cameras.main.width * TutorialConfig.DISPLAY_POSITION.x;
+                const y = this.cameras.main.height * TutorialConfig.DISPLAY_POSITION.y;
+                
+                this.tutorialText = this.add.text(x, y, msg.text, TutorialConfig.TEXT_STYLE)
+                    .setOrigin(0.5)
+                    .setScrollFactor(0)
+                    .setDepth(500);
+                
+                // 淡入效果
+                this.tutorialText.setAlpha(0);
+                this.tweens.add({
+                    targets: this.tutorialText,
+                    alpha: 1,
+                    duration: 300,
+                    ease: 'Power2'
+                });
+                
+                // 自动消失
+                this.time.delayedCall(msg.duration, () => {
+                    if (this.tutorialText && this.tutorialText.text === msg.text) {
+                        this.tweens.add({
+                            targets: this.tutorialText,
+                            alpha: 0,
+                            duration: 300,
+                            ease: 'Power2',
+                            onComplete: () => {
+                                if (this.tutorialText && this.tutorialText.text === msg.text) {
+                                    this.tutorialText.destroy();
+                                    this.tutorialText = null;
+                                }
+                            }
+                        });
+                    }
                 });
             });
-        }
+        });
     }
     
     setupDebugControls() {
@@ -874,15 +978,7 @@ class GameScene extends Phaser.Scene {
     }
     
     showVictoryScreen() {
-        // 创建半透明背景
-        const overlay = this.add.rectangle(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY,
-            GameConfig.GAME_WIDTH,
-            GameConfig.GAME_HEIGHT,
-            0x000000,
-            0.7
-        ).setScrollFactor(0).setDepth(1000);
+        // 不要蒙层，直接显示通关文字
         
         // 通关文字
         const victoryText = this.add.text(

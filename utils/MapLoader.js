@@ -268,11 +268,14 @@ class MapLoader {
                         
                     case '教学':
                     case 'tutorial':
+                    case '攻击教学':
+                    case '爬墙教学':
                         this.objectGroups.tutorials.push({ 
                             x: obj.x, 
                             y: correctedY,
-                            width: obj.width,
-                            height: obj.height,
+                            width: obj.width || 100,  // 默认宽度
+                            height: obj.height || 100, // 默认高度
+                            name: obj.name || type,   // 保存名称
                             properties: obj.properties
                         });
                         break;
@@ -308,6 +311,10 @@ class MapLoader {
     
     getTutorialZones() {
         return this.objectGroups.tutorials;
+    }
+    
+    getTutorialByName(name) {
+        return this.objectGroups.tutorials.find(t => t.name === name);
     }
     
     getTileLayer() {

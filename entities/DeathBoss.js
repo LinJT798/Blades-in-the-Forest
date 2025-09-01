@@ -390,10 +390,16 @@ class DeathBoss extends Enemy {
         this.isPhaseTransitioning = true;
         this.isStunned = true;
         
+        // 重要：确保Boss完全静止不动
+        this.body.setVelocity(0, 0);
+        this.body.setAcceleration(0, 0);
+        
         // 发射多波光波
         const waveTimer = this.scene.time.addEvent({
             delay: config.WAVE_INTERVAL,
             callback: () => {
+                // 每次发射前再次确保不动
+                this.body.setVelocity(0, 0);
                 this.launchWaveAttack(waveCount);
                 waveCount++;
                 
