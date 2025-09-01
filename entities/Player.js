@@ -63,6 +63,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 连击相关
         this.comboWindow = false;
+        this.comboQueued = false;  // 标记是否有连击等待执行
         this.comboFrameStart = 4;
         this.comboFrameEnd = 6;
         
@@ -102,6 +103,24 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         this.animationManager.addAnimationEvent(this, 'attack_1hit', 6, () => {
             this.comboWindow = false;
+        });
+        
+        // 普通攻击动画完成时，检查是否有连击排队
+        this.animationManager.onAnimationComplete(this, 'attack_1hit', () => {
+            if (this.comboQueued && this.currentSP >= GameConfig.SP_COST_COMBO) {
+                // 执行排队的连击
+                this.comboQueued = false;
+                this.animationManager.playAnimation(this, 'combo_attack');
+                this.consumeSP(GameConfig.SP_COST_COMBO);
+                
+                // 连击完成后重置攻击状态
+                this.scene.time.delayedCall(500, () => {
+                    this.states.isAttacking = false;
+                });
+            } else {
+                // 没有连击，重置攻击状态
+                this.states.isAttacking = false;
+            }
         });
         
         // 连击动画事件
@@ -170,7 +189,23 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
-        // 移动输入（只在非贴墙状态下处理）
+        // 攻击输入处理（可以在移动时攻击）
+        if (this.keys.attack.isDown && this.keys.attack.getDuration() < 100) {
+            this.attack();
+        }
+        
+        // 攻击状态下禁止新的移动输入，但保持惯性
+        if (this.states.isAttacking) {
+            // 攻击时逐渐减速
+            this.body.setVelocityX(this.body.velocity.x * 0.8);
+            // 攻击时仍然可以跳跃
+            if (this.keys.jump.isDown && this.keys.jump.getDuration() < 100) {
+                this.jump();
+            }
+            return;
+        }
+        
+        // 移动输入（只在非攻击状态下处理）
         let velocityX = 0;
         const moveSpeed = this.states.isDefending ? 75 : 
                          (this.states.isRunning ? GameConfig.RUN_SPEED : GameConfig.WALK_SPEED);
@@ -194,11 +229,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // 跳跃
         if (this.keys.jump.isDown && this.keys.jump.getDuration() < 100) {
             this.jump();
-        }
-        
-        // 攻击
-        if (this.keys.attack.isDown && this.keys.attack.getDuration() < 100) {
-            this.attack();
         }
     }
     
@@ -304,32 +334,28 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     attack() {
-        if (this.states.isAttacking || this.states.isDefending || this.currentSP < GameConfig.SP_COST_ATTACK) {
+        // 如果正在防御或精力不足，不能攻击
+        if (this.states.isDefending || this.currentSP < GameConfig.SP_COST_ATTACK) {
             return;
         }
         
-        // 检查是否在连击窗口
-        if (this.comboWindow && this.currentSP >= GameConfig.SP_COST_COMBO) {
-            // 执行连击
+        // 检查是否在连击窗口期间
+        if (this.comboWindow && this.states.isAttacking) {
+            // 在连击窗口期间按下攻击键，标记连击等待执行
+            if (this.currentSP >= GameConfig.SP_COST_COMBO) {
+                this.comboQueued = true;
+            }
+            return;
+        }
+        
+        // 如果不在攻击状态，执行普通攻击
+        if (!this.states.isAttacking) {
             this.states.isAttacking = true;
-            this.animationManager.playAnimation(this, 'combo_attack');
-            this.consumeSP(GameConfig.SP_COST_COMBO);
-            
-            // 连击完成后重置
-            this.scene.time.delayedCall(500, () => {
-                this.states.isAttacking = false;
-                this.comboWindow = false;
-            });
-        } else {
-            // 执行普通攻击
-            this.states.isAttacking = true;
+            this.comboQueued = false;  // 重置连击标记
             this.animationManager.playAnimation(this, 'attack_1hit');
             this.consumeSP(GameConfig.SP_COST_ATTACK);
             
-            // 攻击完成后重置
-            this.scene.time.delayedCall(600, () => {
-                this.states.isAttacking = false;
-            });
+            // 注意：攻击完成的处理已移到 onAnimationComplete 事件中
         }
     }
     
@@ -349,6 +375,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         const hitboxX = this.x + attackRange;
         const hitboxY = this.y;
         
+        // 攻击时向前冲刺一小段距离
+        const dashForce = this.states.facingRight ? 80 : -80;
+        this.body.setVelocityX(this.body.velocity.x + dashForce);
+        
         // 触发攻击事件（由游戏场景处理）
         this.scene.events.emit('playerAttack', {
             x: hitboxX,
@@ -365,6 +395,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         const attackRange = this.states.facingRight ? 40 : -40;  // 减少距离，让碰撞盒更贴近玩家
         const hitboxX = this.x + attackRange;
         const hitboxY = this.y;
+        
+        // 连击时向前冲刺更远的距离
+        const dashForce = this.states.facingRight ? 120 : -120;
+        this.body.setVelocityX(this.body.velocity.x + dashForce);
         
         // 触发连击事件
         this.scene.events.emit('playerAttack', {
