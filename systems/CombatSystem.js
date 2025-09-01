@@ -60,9 +60,12 @@ class CombatSystem {
         // 显示攻击特效
         this.showAttackEffect(attackData.x, attackData.y);
         
-        // 销毁判定盒
-        this.scene.time.delayedCall(100, () => {
-            hitbox.destroy();
+        // 销毁判定盒（Debug 模式下延长显示时间便于观察）
+        const playerHitboxLifetime = (this.scene.physics && this.scene.physics.world && this.scene.physics.world.drawDebug) ? 250 : 100;
+        this.scene.time.delayedCall(playerHitboxLifetime, () => {
+            if (hitbox && hitbox.destroy) {
+                hitbox.destroy();
+            }
         });
     }
     
@@ -93,14 +96,17 @@ class CombatSystem {
             );
         }
         
-        // 销毁判定盒
-        this.scene.time.delayedCall(100, () => {
-            hitbox.destroy();
+        // 销毁判定盒（Debug 模式下延长显示时间便于观察）
+        const enemyHitboxLifetime = (this.scene.physics && this.scene.physics.world && this.scene.physics.world.drawDebug) ? 250 : 100;
+        this.scene.time.delayedCall(enemyHitboxLifetime, () => {
+            if (hitbox && hitbox.destroy) {
+                hitbox.destroy();
+            }
         });
     }
     
     createHitbox(x, y, width, height) {
-        // 创建一个矩形作为攻击判定盒
+        // 创建一个矩形作为攻击判定盒（默认透明）
         const hitbox = this.scene.add.rectangle(
             x, y, width, height, 0xff0000, 0
         );
@@ -108,9 +114,20 @@ class CombatSystem {
         // 添加物理体
         this.scene.physics.add.existing(hitbox, true);
         
-        // 调试模式下显示判定盒
-        if (this.scene.physics.world.drawDebug) {
-            hitbox.setAlpha(0.3);
+        // 调试模式下显示判定盒：设置填充透明度与描边，置顶层
+        if (this.scene.physics && this.scene.physics.world && this.scene.physics.world.drawDebug) {
+            if (typeof hitbox.setFillStyle === 'function') {
+                hitbox.setFillStyle(0xff0000, 0.3);
+                if (typeof hitbox.setStrokeStyle === 'function') {
+                    hitbox.setStrokeStyle(1, 0xff0000, 0.8);
+                }
+                if (typeof hitbox.setDepth === 'function') {
+                    hitbox.setDepth(1000);
+                }
+            } else {
+                // 兜底：直接设置对象透明度（某些版本也能生效）
+                hitbox.alpha = 0.3;
+            }
         }
         
         this.attackHitboxes.push(hitbox);

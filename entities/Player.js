@@ -66,6 +66,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.comboQueued = false;  // 标记是否有连击等待执行
         this.comboFrameStart = 4;
         this.comboFrameEnd = 6;
+        this.comboHitEmitted = false; // 连击判定是否已触发（防重复）
         
         // 设置动画事件
         this.setupAnimationEvents();
@@ -97,10 +98,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     setupAnimationEvents() {
         // 攻击动画事件
         this.animationManager.addAnimationEvent(this, 'attack_1hit', 3, () => {
-            this.comboWindow = true;
             this.triggerAttackHitbox();
         });
         
+        // 在第4帧打开连击窗口，在第6帧关闭（攻击共6帧）
+        this.animationManager.addAnimationEvent(this, 'attack_1hit', 4, () => {
+            this.comboWindow = true;
+        });
         this.animationManager.addAnimationEvent(this, 'attack_1hit', 6, () => {
             this.comboWindow = false;
         });
@@ -110,6 +114,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             if (this.comboQueued && this.currentSP >= GameConfig.SP_COST_COMBO) {
                 // 执行排队的连击
                 this.comboQueued = false;
+                this.comboHitEmitted = false; // 重置连击判定标志
                 this.animationManager.playAnimation(this, 'combo_attack');
                 this.consumeSP(GameConfig.SP_COST_COMBO);
                 
@@ -123,9 +128,37 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             }
         });
         
-        // 连击动画事件
+        // 连击动画事件（为兼容不同帧索引实现，第0和第1帧都监听，做一次性触发）
+        this.animationManager.addAnimationEvent(this, 'combo_attack', 0, () => {
+            if (!this.comboHitEmitted) {
+                this.comboHitEmitted = true;
+                this.triggerComboHitbox();
+            }
+        });
         this.animationManager.addAnimationEvent(this, 'combo_attack', 1, () => {
-            this.triggerComboHitbox();
+            if (!this.comboHitEmitted) {
+                this.comboHitEmitted = true;
+                this.triggerComboHitbox();
+            }
+        });
+
+        // 连击动画开始即触发（最早路径，避免“慢一帧”）：
+        this.on('animationstart', (animation) => {
+            const fullKey = this.animationManager.getFullAnimationKey(this, 'combo_attack');
+            if (animation.key === fullKey && !this.comboHitEmitted) {
+                this.comboHitEmitted = true;
+                this.triggerComboHitbox();
+            }
+        });
+
+        // 连击动画完成兜底：若帧事件未触发，则在动画完成时触发一次判定
+        this.animationManager.onAnimationComplete(this, 'combo_attack', () => {
+            if (!this.comboHitEmitted) {
+                this.comboHitEmitted = true;
+                this.triggerComboHitbox();
+            }
+            // 确保连击结束后退出攻击状态
+            this.states.isAttacking = false;
         });
         
         // 死亡动画完成
