@@ -62,7 +62,7 @@ const GameConfig = {
     },
     
     DEATH_BOSS: {
-        HP: 200,
+        HP: 150,
         ATTACK: 22,
         MOVE_SPEED: 50,
         ATTACK_RADIUS: 50,
