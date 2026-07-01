@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blades Tilemap Editor</title>
+    <link rel="stylesheet" href="tilemap-editor.css?v=2">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <header class="brand-block">
+                <div>
+                    <h1>Tilemap Editor</h1>
+                    <p>map/map_full.tmj</p>
+                </div>
+                <a class="ghost-link" href="index.html" target="_blank" rel="noreferrer">Play</a>
+            </header>
+
+            <section class="panel">
+                <label for="layerSelect">Layer</label>
+                <select id="layerSelect"></select>
+            </section>
+
+            <section class="panel">
+                <label for="tilesetSelect">Tileset</label>
+                <select id="tilesetSelect"></select>
+                <div class="tile-preview">
+                    <canvas id="selectedTileCanvas" width="48" height="48"></canvas>
+                    <div>
+                        <span class="meta-label">Selected GID</span>
+                        <strong id="selectedGid">0</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="tool-grid" id="toolGrid">
+                    <button type="button" data-tool="brush" class="is-active" title="Paint tile">Brush</button>
+                    <button type="button" data-tool="erase" title="Erase tile">Erase</button>
+                    <button type="button" data-tool="pick" title="Pick tile">Pick</button>
+                    <button type="button" data-tool="fill" title="Flood fill">Fill</button>
+                    <button type="button" data-tool="pan" title="Pan canvas">Pan</button>
+                </div>
+            </section>
+
+            <section class="panel">
+                <label>View</label>
+                <div class="button-row">
+                    <button type="button" id="zoomOut">Zoom -</button>
+                    <button type="button" id="zoomReset">Reset</button>
+                    <button type="button" id="zoomIn">Zoom +</button>
+                </div>
+                <label class="check-row">
+                    <input type="checkbox" id="gridToggle" checked>
+                    <span>Grid</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" id="objectsToggle" checked>
+                    <span>Objects</span>
+                </label>
+            </section>
+
+            <section class="panel">
+                <label>History</label>
+                <div class="button-row">
+                    <button type="button" id="undoButton">Undo</button>
+                    <button type="button" id="redoButton">Redo</button>
+                </div>
+            </section>
+
+            <section class="panel">
+                <label>File</label>
+                <div class="button-stack">
+                    <button type="button" id="saveButton" class="primary-button">Save TMJ</button>
+                    <button type="button" id="downloadButton">Download TMJ</button>
+                    <button type="button" id="reloadButton">Reload Map</button>
+                </div>
+            </section>
+        </aside>
+
+        <main class="workspace">
+            <div class="topbar">
+                <div id="statusText">Loading map...</div>
+                <div class="readouts">
+                    <span id="cellReadout">Cell -,-</span>
+                    <span id="zoomReadout">100%</span>
+                </div>
+            </div>
+            <div class="canvas-frame" id="canvasFrame">
+                <canvas id="mapCanvas"></canvas>
+            </div>
+        </main>
+
+        <aside class="palette-panel">
+            <div class="palette-header">
+                <h2>Tiles</h2>
+                <span id="paletteCount">0</span>
+            </div>
+            <div id="palette" class="palette"></div>
+        </aside>
+    </div>
+
+    <script src="tilemap-editor.js?v=2"></script>
+</body>
+</html>

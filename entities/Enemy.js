@@ -189,7 +189,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             y: this.y,
             width: this.attackRadius,
             height: 40,
-            damage: this.attackPower
+            damage: this.attackPower,
+            source: 'enemy',
+            sourceX: this.x,
+            heavy: false
         });
     }
     

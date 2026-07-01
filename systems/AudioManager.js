@@ -126,21 +126,33 @@ class AudioManager {
         
         // 使用缓存的音效实例或创建新的
         let sound = this.soundEffects[key];
+        let isTemporarySound = false;
         
         if (!sound || sound.isPlaying) {
             // 如果正在播放或不存在，创建新实例
             sound = this.scene.sound.add(key, {
-                volume: config.volume || this.sfxVolume,
+                volume: config.volume ?? this.sfxVolume,
                 detune: config.detune || 0,
                 rate: config.rate || 1,
                 loop: false
             });
+            isTemporarySound = true;
+        } else {
+            if (sound.setVolume) {
+                sound.setVolume(config.volume ?? this.sfxVolume);
+            }
+            if (sound.setDetune) {
+                sound.setDetune(config.detune || 0);
+            }
+            if (sound.setRate) {
+                sound.setRate(config.rate || 1);
+            }
         }
         
         sound.play();
         
-        // 如果不是预定义的音效，播放后销毁
-        if (!this.soundEffects[key]) {
+        // 临时叠加音效播放后销毁，避免连续命中泄漏声音实例
+        if (isTemporarySound) {
             sound.once('complete', () => {
                 sound.destroy();
             });
@@ -161,13 +173,25 @@ class AudioManager {
     }
     
     // 播放受击音效
-    playHitSound(target = 'PLAYER') {
+    playHitSound(target = 'PLAYER', options = {}) {
         const config = AudioConfig.SFX.HIT[target] || AudioConfig.SFX.HIT.PLAYER;
         
         if (config && config.key) {
+            const detune = options.detune ?? Phaser.Math.Between(-60, 60);
+            const rate = options.rate || 1;
             this.playSFX(config.key, {
-                volume: config.volume * this.masterVolume
+                volume: config.volume * this.masterVolume,
+                detune,
+                rate
             });
+            
+            if (options.heavy) {
+                this.playSFX(config.key, {
+                    volume: config.volume * this.masterVolume * 0.45,
+                    detune: -220,
+                    rate: 0.82
+                });
+            }
         }
     }
     

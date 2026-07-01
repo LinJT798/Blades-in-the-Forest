@@ -434,6 +434,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             width: 30,
             height: 40,
             damage: this.attackPower,
+            hitKind: 'normal',
+            facingRight: this.states.facingRight,
             lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
         });
     }
@@ -460,11 +462,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             width: 40,  // 调整宽度，匹配新的攻击距离
             height: 45,
             damage: this.comboAttackPower,
+            hitKind: 'combo',
+            facingRight: this.states.facingRight,
             lifesteal: window.gameData.buffs?.lifesteal || 0 // 传递生命偷取比率
         });
     }
     
-    takeDamage(damage) {
+    takeDamage(damage, context = {}) {
         if (this.states.isInvincible || this.states.isDead) {
             return 0;
         }
@@ -489,6 +493,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             window.gameData.playerHP = this.currentHP;
         }
         
+        const feedbackContext = this.createDamageFeedbackContext(actualDamage, damage, isDefending, context);
+        this.scene.events.emit('playerDamaged', feedbackContext);
+        
         // 检查死亡
         if (this.currentHP <= 0) {
             this.die();
@@ -497,28 +504,78 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         // 受击效果（防御状态特殊处理）
         if (isDefending) {
-            this.onDefendHit();
+            this.onDefendHit(feedbackContext);
         } else {
-            this.onHit();
+            this.onHit(feedbackContext);
         }
         
         return actualDamage;
     }
     
-    onHit() {
+    createDamageFeedbackContext(actualDamage, rawDamage, isDefending, context = {}) {
+        const knockbackDirection = this.getDamageKnockbackDirection(context);
+        const heavy = Boolean(
+            context.heavy ||
+            context.source === 'boss' ||
+            context.source === 'wave' ||
+            actualDamage >= this.maxHP * 0.18
+        );
+        
+        return {
+            player: this,
+            actualDamage,
+            rawDamage,
+            remainingHP: this.currentHP,
+            maxHP: this.maxHP,
+            isDefending,
+            isFatal: this.currentHP <= 0,
+            source: context.source || 'unknown',
+            sourceX: context.sourceX,
+            knockbackDirection,
+            hitX: context.hitX ?? (this.x - knockbackDirection * 14),
+            hitY: context.hitY ?? (this.y - 10),
+            heavy
+        };
+    }
+    
+    getDamageKnockbackDirection(context = {}) {
+        if (typeof context.knockbackDirection === 'number' && context.knockbackDirection !== 0) {
+            return Math.sign(context.knockbackDirection);
+        }
+        
+        if (typeof context.sourceX === 'number' && context.sourceX !== this.x) {
+            return this.x >= context.sourceX ? 1 : -1;
+        }
+        
+        return this.states.facingRight ? -1 : 1;
+    }
+    
+    onHit(context = {}) {
         // 播放受击音效
         if (this.scene.audioManager) {
-            this.scene.audioManager.playHitSound('PLAYER');
+            this.scene.audioManager.playHitSound('PLAYER', {
+                heavy: context.heavy,
+                rate: context.heavy ? 0.9 : 1
+            });
         }
         
         // 受击硬直
         this.states.isStunned = true;
         this.states.isAttacking = false;
         
+        if (this.animationManager) {
+            this.animationManager.playAnimation(this, 'be_attacked');
+        }
         
         // 击退
-        const knockbackDirection = this.states.facingRight ? -1 : 1;
-        this.body.setVelocityX(knockbackDirection * GameConfig.KNOCKBACK_DISTANCE);
+        const knockbackDirection = context.knockbackDirection || this.getDamageKnockbackDirection(context);
+        const knockbackForce = context.heavy ? 185 : 125;
+        this.body.setVelocityX(knockbackDirection * knockbackForce);
+        this.scene.time.delayedCall(140, () => {
+            if (this.body && !this.states.isDead) {
+                this.body.setVelocityX(this.body.velocity.x * 0.45);
+            }
+        });
         
         // 闪烁效果
         this.setTint(0xff0000);
@@ -547,17 +604,20 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         });
     }
     
-    onDefendHit() {
+    onDefendHit(context = {}) {
         // 播放防御受击音效
         if (this.scene.audioManager) {
-            this.scene.audioManager.playHitSound('PLAYER');
+            this.scene.audioManager.playHitSound('PLAYER', {
+                detune: 120,
+                rate: 1.08
+            });
         }
         
         // 防御状态下被击中，保持防御动画，只有击退和闪烁
         
         // 轻微击退（防御时击退更小）
-        const knockbackDirection = this.states.facingRight ? -1 : 1;
-        this.body.setVelocityX(knockbackDirection * GameConfig.KNOCKBACK_DISTANCE * 0.3);
+        const knockbackDirection = context.knockbackDirection || this.getDamageKnockbackDirection(context);
+        this.body.setVelocityX(knockbackDirection * 70);
         
         // 闪烁效果（防御成功的蓝色闪烁，更明显）
         this.setTint(0x4444ff);

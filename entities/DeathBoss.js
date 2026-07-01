@@ -531,7 +531,13 @@ class DeathBoss extends Enemy {
                         this.scene.combatSystem.dealDamage(
                             player,
                             wave.damage,
-                            'wave'
+                            'wave',
+                            {
+                                sourceX: wave.x,
+                                hitX: player.x,
+                                hitY: player.y - 12,
+                                heavy: true
+                            }
                         );
                         
                         // 击退效果
@@ -788,7 +794,10 @@ class DeathBoss extends Enemy {
             y: this.y,
             width: attackRange * 2,
             height: 60,
-            damage: this.attackPower
+            damage: this.attackPower,
+            source: 'boss',
+            sourceX: this.x,
+            heavy: true
         });
     }
     
